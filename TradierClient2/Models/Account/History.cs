@@ -1,6 +1,8 @@
-﻿using Newtonsoft.Json;
+﻿using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
 namespace Tradier.Client.Models.Account
 {
@@ -18,9 +20,13 @@ namespace Tradier.Client.Models.Account
         [JsonProperty("event")]
 
         public List<Event> Event { get; set; }
+        [Key]
+        [JsonProperty("id")]
+        public Int32 id { get; set; }
+
 
     }
-
+    [Owned]
     public class Event
     {
         [JsonProperty("amount")]
@@ -55,6 +61,7 @@ namespace Tradier.Client.Models.Account
 
     }
 
+    [Owned]
     public class Trade
     {
         [JsonProperty("commission")]
@@ -82,6 +89,7 @@ namespace Tradier.Client.Models.Account
 
     }
 
+    [Owned]
     public class Adjustment
     {
         [JsonProperty("description")]
@@ -93,6 +101,7 @@ namespace Tradier.Client.Models.Account
         public float Quantity { get; set; }
     }
 
+    [Owned]
     public class Option
     {
         [JsonProperty("option_type")]
@@ -109,6 +118,7 @@ namespace Tradier.Client.Models.Account
         public float Quantity { get; set; }
     }
 
+    [Owned]
     public class Journal
     {
         [JsonProperty("description")]

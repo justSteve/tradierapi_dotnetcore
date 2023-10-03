@@ -1,4 +1,5 @@
-﻿using cli.Helpers;
+﻿using System.Threading.Tasks;
+    using cli.Helpers;
 using Tradier.Client;
 using Tradier.Client.Models.Account;
 using Tradier.Client.Models.MarketData;
@@ -14,16 +15,27 @@ app.MapGet("/", () => "Hello World!");
 
 app.Run();
 
-//var settingsManager = new cli.Helpers.SecretManager();
-//var apiSettings = settingsManager.LoadSecrets();
+//static async Task Main(string[] args)
+//{
 
-//TradierClient client = new TradierClient("Somethi", "apiSettings.TradierAccountId");
+//try
+//{
+//    var settingsManager = new cli.Helpers.SecretManager();
+//        var apiSettings = settingsManager.LoadSecrets();
 
+//        TradierClient client = new TradierClient(apiSettings.ACCESS_TOKEN_pjk, apiSettings.ACCOUNT_ID_pjk, true);
+//        Balances balance = await client.Account.GetBalances();
+//    }
+//    catch (Exception ex)
+//    {
+//        Console.WriteLine($"An exception occurred: {ex}");
+//    }
+
+//}
 //////Tradier.Client.TradierClient client = new Tradier.Client.TradierClient("HQkigAvv7GtJEMKcbm5DPlbSUyrp", "VA94955401");
 ////// See https://aka.ms/new-console-template for more information
 
 //////Profile userProfile = await client.Account.GetUserProfile();
-//////Balances balance = await client.Account.GetBalances();
 //////Positions positions = await client.Account.GetPositions();
 ////History history = await client.Account.GetHistory();
 //////GainLoss gainLoss = await client.Account.GetGainLoss();

@@ -2,6 +2,8 @@
 using System;
 using System.Collections.Generic;
 using Tradier.Client.Helpers;
+using System.ComponentModel.DataAnnotations;
+
 
 namespace Tradier.Client.Models.Account
 {
@@ -25,6 +27,7 @@ namespace Tradier.Client.Models.Account
 
     public class Order
     {
+        [Key]
         [JsonProperty("id")]
         public int Id { get; set; }
 

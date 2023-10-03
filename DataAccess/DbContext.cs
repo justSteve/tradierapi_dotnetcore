@@ -10,16 +10,26 @@ public class TradierDbContext : DbContext
     }
 
     public DbSet<Balances> Balances { get; set; }
-
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        // Define primary key for Balances
-        modelBuilder.Entity<Balances>().HasKey(b => b.AccountNumber);
 
-        // Ignore other classes if they should not be entities
-        modelBuilder.Ignore<Margin>();
-        modelBuilder.Ignore<Cash>();
-        modelBuilder.Ignore<PatternDayTrader>();
-        modelBuilder.Ignore<BalanceRootObject>();
+        modelBuilder.Entity<Balances>()
+            .HasOne(b => b.Margin)
+            .WithOne()
+            .HasForeignKey<Balances>(b => b.MarginId);
+
+        modelBuilder.Entity<Balances>()
+            .HasOne(b => b.Cash)
+            .WithOne()
+            .HasForeignKey<Balances>(b => b.CashId);
+
+        modelBuilder.Entity<Balances>()
+            .HasOne(b => b.PatternDayTrader)
+            .WithOne()
+            .HasForeignKey<Balances>(b => b.PatternDayTraderId);
+        modelBuilder.Entity<Balances>()
+            .HasIndex(b => b.AccountNumber)
+            .IsUnique();
     }
+
 }

@@ -39,7 +39,13 @@ namespace Tradier.Client
         /// </summary>
         public async Task<Balances> GetBalances(string accountNumber = null)
         {
+            var argString = string.Empty; //TODO: populatte this based on endpoint's doc 
+            var outJson = string.Empty; //TODO: populatte this based on endpoint's doc 
+            var _mappedFromEndpointDocs_args = string.Empty; //TODO: populatte this based on endpoint's doc 
+            var _mappedFromEndpointDocs_json = string.Empty; //TODO: populatte this based on endpoint's doc 
             accountNumber = string.IsNullOrEmpty(accountNumber) ? _defaultAccountNumber : accountNumber;
+            var incomingRequest = string.IsNullOrEmpty(argString) ? _mappedFromEndpointDocs_args : accountNumber;
+            var outgoingResponse = string.IsNullOrEmpty(outJson) ? _mappedFromEndpointDocs_json : outJson;
 
             if (string.IsNullOrEmpty(accountNumber))
             {

@@ -1,6 +1,9 @@
 ﻿using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using Microsoft.EntityFrameworkCore;
+
 
 namespace Tradier.Client.Models.Account
 {
@@ -18,11 +21,17 @@ namespace Tradier.Client.Models.Account
         [JsonProperty("closed_position")]
 
         public List<ClosedPosition> ClosedPosition { get; set; }
-
+        [Key]
+        [JsonProperty("id")]
+        public Int32 id { get; set; }
+        
+       
     }
 
+    [Owned]
     public class ClosedPosition
     {
+ 
         [JsonProperty("close_date")]
         public DateTime CloseDate { get; set; }
         
