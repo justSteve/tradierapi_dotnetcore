@@ -1,17 +1,81 @@
-﻿using System.Threading.Tasks;
-    using cli.Helpers;
-using Tradier.Client;
-using Tradier.Client.Models.Account;
-using Tradier.Client.Models.MarketData;
-using Tradier.Client.Models.Trading;
-using cli;
-using Microsoft.Extensions.Hosting;
+﻿using System.Configuration;
+using System.Net.Http;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Serilog;
+using Serilog.Events;
+using Serilog.Sinks.MSSqlServer;
+
 
 var builder = WebApplication.CreateBuilder(args);
+var configuration = builder.Configuration;
+string connectionString = configuration.GetConnectionString("DefaultConnection");
+
+// Initialize Serilog
+var sinkOpts = new MSSqlServerSinkOptions
+{
+    TableName = "Logs",
+    AutoCreateSqlTable = true
+};
+
+Log.Logger = new LoggerConfiguration()
+    .WriteTo.Console()
+    .WriteTo.MSSqlServer(
+        connectionString: connectionString,
+        sinkOptions: sinkOpts,
+        restrictedToMinimumLevel: LogEventLevel.Information
+    )
+    .CreateLogger();
+
+builder.Host.UseSerilog();
+
+// Register HttpClient for DI
+builder.Services.AddHttpClient();
+
 var app = builder.Build();
 
-app.MapGet("/", () => "Hello World!");
+app.MapGet("/", async () =>
+{
+    var httpClientFactory = app.Services.GetRequiredService<IHttpClientFactory>();
+    var httpClient = httpClientFactory.CreateClient();
+
+    // Replace with your Tradier API URL and Token
+    var request = new HttpRequestMessage(HttpMethod.Get, "YourTradierAPIUrlHere");
+    request.Headers.Add("Authorization", "Bearer YourTradierAPITokenHere");
+
+    var response = await httpClient.SendAsync(request);
+    if (response.IsSuccessStatusCode)
+    {
+        var content = await response.Content.ReadAsStringAsync();
+        Log.Information("Tradier API response: {Content}", content);
+    }
+    else
+    {
+        Log.Error("Failed to call Tradier API. Status Code: {StatusCode}", response.StatusCode);
+    }
+
+    return "Hello World!";
+});
+
+// Enable Serilog SelfLog to diagnose issues within Serilog itself
+//Serilog.Debugging.SelfLog.Enable(msg => Console.WriteLine(msg));
+
+app.MapGet("/getbalances", async () =>
+{
+
+    // Initialize your Account object here
+    //Tradier.Client.Account account = new Tradier.Client.Account(/*parameters*/);
+    //SANDBOX: Tradier.Client.TradierClient client = new Tradier.Client.TradierClient("F8Lop8HiyJNx7vH0OgkFNWsUZx3Y", "VA94955401");
+    Tradier.Client.TradierClient client = new Tradier.Client.TradierClient("KoGRlYTOaGLhm38SOWGo5FdTDph0", "6YA29717");
+    // Call GetBalancesF8Lop8HiyJNx7vH0OgkFNWsUZx3Y
+    Balances balances = await client.Account.GetBalances();
+
+    // Return a simple message or the balances object
+    //
+    return balances;
+});
 
 app.Run();
 

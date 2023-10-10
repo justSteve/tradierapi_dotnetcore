@@ -12,20 +12,24 @@ public class BalanceRootObject
 }
 public class Balances
 {
+    [Key]
+    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+    public int sId { get; set; }
+
     [JsonProperty("option_short_value")]
     public float OptionShortValue { get; set; }
+
+    [JsonProperty("date_inserted")]
+    public DateTime DateInserted { get; set; }
 
     [JsonProperty("total_equity")]
     public float TotalEquity { get; set; }
 
     [JsonProperty("account_number")]
     public string? AccountNumber { get; set; }
-    
 
     [JsonProperty("account_type")]
-
     public string? AccountType { get; set; }
-
 
     [JsonProperty("close_pl")]
     public float ClosePL { get; set; }
@@ -110,7 +114,7 @@ public class Cash
     [Key]
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public int sId { get; set; }
-    
+
     [JsonProperty("cash_available")]
     public float CashAvailable { get; set; }
 
@@ -143,29 +147,3 @@ public class PatternDayTrader
     public int StockShortValue { get; set; }
 
 }
-//so 'keeping a root obj just for serialization' is nothing more than keeping this code block in the Balance.cs file?      public class BalanceRootObject
-//{
-//    [JsonProperty("balances")]
-
-//    public Balances Balances { get; set; }
-
-//}
-//Yes, that 's correct. Keeping the BalanceRootObject class serves as a straightforward mapping between the JSON structure and your C# objects. It's a common practice when you're dealing with APIs that nest the actual data you're interested in.
-
-//By having this root object, you can deserialize the entire JSON response into a BalanceRootObject and then easily access its Balances property to get the data you care about. This keeps your code clean, type-safe, and easy to understand, which is particularly useful as your project grows and possibly deals with more complex API responses.
-
-//Here's how you'd typically use it in your GetBalances method:
-
-//csharp
-//Copy code
-//public async Task<Balances> GetBalances(string accountNumber = null)
-//{
-//    ... existing code
-//    var response = await _requests.GetRequest($"accounts/{accountNumber}/balances");
-//    return JsonConvert.DeserializeObject<BalanceRootObject>(response).Balances;
-//}
-//It adds a level of indirection, but in doing so, it makes your code more maintainable and your data model more accurately reflective of the underlying JSON structure.
-
-
-
-

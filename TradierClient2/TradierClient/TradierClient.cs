@@ -1,6 +1,10 @@
-﻿using System;
+﻿using Microsoft.Extensions.Logging;
+using System;
 using System.Net.Http;
 using Tradier.Client.Helpers;
+using Tradier.Client.Models.Account;
+using Serilog;
+
 
 // ReSharper disable once CheckNamespace
 namespace Tradier.Client
@@ -16,14 +20,16 @@ namespace Tradier.Client
         public Trading Trading { get; set; }
         public WatchlistEndpoint Watchlist { get; set; }
 
-        // TODO: Coming soon
-        //public Streaming Streaming { get; set; }
+        private readonly Serilog.ILogger _logger;
 
         /// <summary>
         /// The TradierClient constructor (with an existing HttpClient)
         /// </summary>
-        public TradierClient(HttpClient httpClient, string apiToken, string defaultAccountNumber = null, bool useProduction = false)
+        public TradierClient(HttpClient httpClient, string apiToken, string defaultAccountNumber, bool useProduction = false, Serilog.ILogger logger = null)
         {
+            _logger = logger ?? Log.Logger;  // Use provided logger or fallback to static logger
+            _logger.Information("Initializing TradierClient...");
+
             Uri baseEndpoint = useProduction ? new Uri(Settings.PRODUCTION_ENDPOINT) : new Uri(Settings.SANDBOX_ENDPOINT);
 
             httpClient.BaseAddress = baseEndpoint;
@@ -45,7 +51,7 @@ namespace Tradier.Client
         /// <summary>
         /// The TradierClient constructor (with no HttpClient passed)
         /// </summary>
-        public TradierClient(string apiToken, string defaultAccountNumber, bool useProduction = false)
+        public TradierClient(string apiToken, string defaultAccountNumber, bool useProduction = true)
            : this(new HttpClient(), apiToken, defaultAccountNumber, useProduction)
         {
         }

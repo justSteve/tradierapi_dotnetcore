@@ -19,6 +19,10 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DataAccess", "DataAccess\Da
 EndProject
 Project("{9092AA53-FB77-4645-B42D-1CCCA6BD08BD}") = "VueWeb", "VueWeb\VueWeb.njsproj", "{25DE75D4-0DF7-4718-81CC-50443251E023}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "parseOrders", "parseOrders\parseOrders.csproj", "{4CA52905-D57E-4883-BCDF-066F88668438}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SharedHelpers2", "SharedHelpers2\SharedHelpers2.csproj", "{86A372C7-6F44-4922-92FC-A88DB1891D46}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -41,6 +45,14 @@ Global
 		{25DE75D4-0DF7-4718-81CC-50443251E023}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{25DE75D4-0DF7-4718-81CC-50443251E023}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{25DE75D4-0DF7-4718-81CC-50443251E023}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4CA52905-D57E-4883-BCDF-066F88668438}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4CA52905-D57E-4883-BCDF-066F88668438}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4CA52905-D57E-4883-BCDF-066F88668438}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4CA52905-D57E-4883-BCDF-066F88668438}.Release|Any CPU.Build.0 = Release|Any CPU
+		{86A372C7-6F44-4922-92FC-A88DB1891D46}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{86A372C7-6F44-4922-92FC-A88DB1891D46}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{86A372C7-6F44-4922-92FC-A88DB1891D46}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{86A372C7-6F44-4922-92FC-A88DB1891D46}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

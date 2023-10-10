@@ -27,9 +27,14 @@ public class TradierDbContext : DbContext
             .HasOne(b => b.PatternDayTrader)
             .WithOne()
             .HasForeignKey<Balances>(b => b.PatternDayTraderId);
+
         modelBuilder.Entity<Balances>()
             .HasIndex(b => b.AccountNumber)
             .IsUnique();
+
+        modelBuilder.Entity<Balances>()
+            .HasKey(b => b.sId);  // Explicitly set the primary key
+
     }
 
 }

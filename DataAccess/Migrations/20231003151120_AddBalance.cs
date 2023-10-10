@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
+﻿using System;
+using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
@@ -14,7 +15,7 @@ namespace DataAccess.Migrations
                 name: "Cash",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
+                    sId = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     CashAvailable = table.Column<float>(type: "real", nullable: false),
                     Sweep = table.Column<int>(type: "int", nullable: false),
@@ -22,14 +23,14 @@ namespace DataAccess.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Cash", x => x.Id);
+                    table.PrimaryKey("PK_Cash", x => x.sId);
                 });
 
             migrationBuilder.CreateTable(
                 name: "Margin",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
+                    sId = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     FedCall = table.Column<int>(type: "int", nullable: false),
                     MaintenanceCall = table.Column<int>(type: "int", nullable: false),
@@ -40,14 +41,14 @@ namespace DataAccess.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Margin", x => x.Id);
+                    table.PrimaryKey("PK_Margin", x => x.sId);
                 });
 
             migrationBuilder.CreateTable(
                 name: "PatternDayTrader",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
+                    sId = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     FedCall = table.Column<int>(type: "int", nullable: false),
                     MaintenanceCall = table.Column<int>(type: "int", nullable: false),
@@ -57,17 +58,20 @@ namespace DataAccess.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_PatternDayTrader", x => x.Id);
+                    table.PrimaryKey("PK_PatternDayTrader", x => x.sId);
                 });
 
             migrationBuilder.CreateTable(
                 name: "Balances",
                 columns: table => new
                 {
-                    AccountNumber = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    sId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
                     OptionShortValue = table.Column<float>(type: "real", nullable: false),
+                    DateInserted = table.Column<DateTime>(type: "datetime2", nullable: false),
                     TotalEquity = table.Column<float>(type: "real", nullable: false),
-                    AccountType = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    AccountNumber = table.Column<string>(type: "nvarchar(450)", nullable: true),
+                    AccountType = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     ClosePL = table.Column<float>(type: "real", nullable: false),
                     CurrentRequirement = table.Column<float>(type: "real", nullable: false),
                     Equity = table.Column<int>(type: "int", nullable: false),
@@ -88,26 +92,33 @@ namespace DataAccess.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Balances", x => x.AccountNumber);
+                    table.PrimaryKey("PK_Balances", x => x.sId);
                     table.ForeignKey(
                         name: "FK_Balances_Cash_CashId",
                         column: x => x.CashId,
                         principalTable: "Cash",
-                        principalColumn: "Id",
+                        principalColumn: "sId",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_Balances_Margin_MarginId",
                         column: x => x.MarginId,
                         principalTable: "Margin",
-                        principalColumn: "Id",
+                        principalColumn: "sId",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_Balances_PatternDayTrader_PatternDayTraderId",
                         column: x => x.PatternDayTraderId,
                         principalTable: "PatternDayTrader",
-                        principalColumn: "Id",
+                        principalColumn: "sId",
                         onDelete: ReferentialAction.Cascade);
                 });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Balances_AccountNumber",
+                table: "Balances",
+                column: "AccountNumber",
+                unique: true,
+                filter: "[AccountNumber] IS NOT NULL");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Balances_CashId",

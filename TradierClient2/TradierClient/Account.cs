@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using Tradier.Client.Exceptions;
 using Tradier.Client.Helpers;
 using Tradier.Client.Models.Account;
-
+using Serilog;
 // ReSharper disable once CheckNamespace
 namespace Tradier.Client
 {
@@ -14,15 +14,23 @@ namespace Tradier.Client
     public class Account
     {
         private readonly Requests _requests;
-        private readonly string _defaultAccountNumber;
+        private readonly string _accountNumber = "";
+        private readonly string _authToken = "";
+
+        private readonly Serilog.ILogger _logger;
+
+        // Other member variables and methods
+
 
         /// <summary>
         /// Account Constructor
         /// </summary>
-        public Account(Requests requests, string defaultAccountNumber)
+        public Account(Requests requests, string defaultAccountNumber, Serilog.ILogger logger = null)
         {
             _requests = requests;
-            _defaultAccountNumber = defaultAccountNumber;
+            _accountNumber = defaultAccountNumber;
+            _logger = logger ?? Log.Logger;  // Use provided logger or fallback to static logger
+
         }
 
         /// <summary>
@@ -34,34 +42,28 @@ namespace Tradier.Client
             return JsonConvert.DeserializeObject<ProfileRootObject>(response).Profile;
         }
 
+
         /// <summary>
         /// Get balances information for a specific or a default user account.
         /// </summary>
-        public async Task<Balances> GetBalances(string accountNumber = null)
+        public async Task<Balances> GetBalances()
         {
-            var argString = string.Empty; //TODO: populatte this based on endpoint's doc 
-            var outJson = string.Empty; //TODO: populatte this based on endpoint's doc 
-            var _mappedFromEndpointDocs_args = string.Empty; //TODO: populatte this based on endpoint's doc 
-            var _mappedFromEndpointDocs_json = string.Empty; //TODO: populatte this based on endpoint's doc 
-            accountNumber = string.IsNullOrEmpty(accountNumber) ? _defaultAccountNumber : accountNumber;
-            var incomingRequest = string.IsNullOrEmpty(argString) ? _mappedFromEndpointDocs_args : accountNumber;
-            var outgoingResponse = string.IsNullOrEmpty(outJson) ? _mappedFromEndpointDocs_json : outJson;
+            _logger.Information("hit bal");
+            var response = await _requests.GetRequest($"accounts/{_accountNumber}/balances");
 
-            if (string.IsNullOrEmpty(accountNumber))
-            {
-                throw new MissingAccountNumberException();
-            }
+            _logger.Information($"{nameof(Balances)}: {response}");
 
-            var response = await _requests.GetRequest($"accounts/{accountNumber}/balances");
             return JsonConvert.DeserializeObject<BalanceRootObject>(response).Balances;
+
         }
+
 
         /// <summary>
         /// Get the current positions being held in an account. These positions are updated intraday via trading
         /// </summary>
         public async Task<Positions> GetPositions(string accountNumber = null)
         {
-            accountNumber = string.IsNullOrEmpty(accountNumber) ? _defaultAccountNumber : accountNumber;
+            accountNumber = string.IsNullOrEmpty(accountNumber) ? _accountNumber : accountNumber;
 
             if (string.IsNullOrEmpty(accountNumber))
             {
@@ -77,12 +79,12 @@ namespace Tradier.Client
         /// </summary>
         public async Task<History> GetHistory(int page = 1, int limitPerPage = 25)
         {
-            if (string.IsNullOrEmpty(_defaultAccountNumber))
+            if (string.IsNullOrEmpty(_accountNumber))
             {
                 throw new MissingAccountNumberException("The default account number was not defined.");
             }
 
-            return await GetHistory(_defaultAccountNumber, page, limitPerPage);
+            return await GetHistory(_accountNumber, page, limitPerPage);
         }
 
         /// <summary>
@@ -99,12 +101,12 @@ namespace Tradier.Client
         /// </summary>
         public async Task<GainLoss> GetGainLoss(int page = 1, int limitPerPage = 25)
         {
-            if (string.IsNullOrEmpty(_defaultAccountNumber))
+            if (string.IsNullOrEmpty(_accountNumber))
             {
                 throw new MissingAccountNumberException("The default account number was not defined.");
             }
 
-            return await GetGainLoss(_defaultAccountNumber, page, limitPerPage);
+            return await GetGainLoss(_accountNumber, page, limitPerPage);
         }
 
         /// <summary>
@@ -121,7 +123,7 @@ namespace Tradier.Client
         /// </summary>
         public async Task<Orders> GetOrders(string accountNumber = null)
         {
-            accountNumber = string.IsNullOrEmpty(accountNumber) ? _defaultAccountNumber : accountNumber;
+            accountNumber = string.IsNullOrEmpty(accountNumber) ? _accountNumber : accountNumber;
 
             if (string.IsNullOrEmpty(accountNumber))
             {
@@ -142,12 +144,12 @@ namespace Tradier.Client
         /// </summary>
         public async Task<Order> GetOrder(int orderId)
         {
-            if (string.IsNullOrEmpty(_defaultAccountNumber))
+            if (string.IsNullOrEmpty(_accountNumber))
             {
                 throw new MissingAccountNumberException("The default account number was not defined.");
             }
 
-            return await GetOrder(_defaultAccountNumber, orderId);
+            return await GetOrder(_accountNumber, orderId);
         }
 
         /// <summary>
