@@ -21,7 +21,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\DataAccess\DataAccess.csproj" />
-    <ProjectReference Include="..\TradierClient2\TradierClient2.csproj" />
+    <ProjectReference Include="..\TradierClient2\Tradier.Client.csproj" />
   </ItemGroup>
 
   <ItemGroup>

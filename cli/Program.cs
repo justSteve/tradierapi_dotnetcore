@@ -1,12 +1,15 @@
 ﻿using System.Configuration;
 using System.Net.Http;
 using System.Threading.Tasks;
+using cli.Helpers;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog;
 using Serilog.Events;
 using Serilog.Sinks.MSSqlServer;
+using Tradier.Client.Helpers;
+using Tradier.Client.Models.Account;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -19,7 +22,7 @@ var sinkOpts = new MSSqlServerSinkOptions
     TableName = "Logs",
     AutoCreateSqlTable = true
 };
-
+//var userAcct = 
 Log.Logger = new LoggerConfiguration()
     .WriteTo.Console()
     .WriteTo.MSSqlServer(
@@ -35,6 +38,15 @@ builder.Host.UseSerilog();
 builder.Services.AddHttpClient();
 
 var app = builder.Build();
+SecretManager secretManager = new SecretManager();
+
+// Call the LoadSecrets method
+Settings settings = secretManager.LoadSecrets();
+
+// Use the settings object
+var token = settings.ACCESS_TOKEN_pjk;
+var acct = settings.ACCOUNT_ID_pjk;
+
 
 app.MapGet("/", async () =>
 {
@@ -66,15 +78,26 @@ app.MapGet("/getbalances", async () =>
 {
 
     // Initialize your Account object here
-    //Tradier.Client.Account account = new Tradier.Client.Account(/*parameters*/);
-    //SANDBOX: Tradier.Client.TradierClient client = new Tradier.Client.TradierClient("F8Lop8HiyJNx7vH0OgkFNWsUZx3Y", "VA94955401");
-    Tradier.Client.TradierClient client = new Tradier.Client.TradierClient("KoGRlYTOaGLhm38SOWGo5FdTDph0", "6YA29717");
-    // Call GetBalancesF8Lop8HiyJNx7vH0OgkFNWsUZx3Y
+    Tradier.Client.TradierClient client = new Tradier.Client.TradierClient(token, acct);
+    
     Balances balances = await client.Account.GetBalances();
 
     // Return a simple message or the balances object
     //
     return balances;
+});
+
+app.MapGet("/getorders", async () =>
+{
+
+    // Initialize your Account object here
+    Tradier.Client.TradierClient client = new Tradier.Client.TradierClient(token, acct);
+    
+    Orders orders = await client.Account.GetOrders();
+
+    // Return a simple message or the balances object
+    //
+    return orders;
 });
 
 app.Run();

@@ -28,6 +28,10 @@ namespace Tradier.Client.Models.Account
     public class Order
     {
         [Key]
+        [JsonProperty("stradeId")]
+        public int StradeId { get; set; }
+        
+        
         [JsonProperty("id")]
         public int Id { get; set; }
 
@@ -102,15 +106,20 @@ namespace Tradier.Client.Models.Account
 
 
         [JsonProperty("leg")]
-
-        public Leg[] Leg { get; set; }
+        public List<Leg> Legs { get; set; }  // Renamed to "Legs" for clarity
 
     }
 
     public class Leg
     {
+        [Key]
         [JsonProperty("id")]
         public int Id { get; set; }
+
+
+        [JsonProperty("orderId")]
+        public int OrderId { get; set; }
+        
 
         [JsonProperty("type")]
 

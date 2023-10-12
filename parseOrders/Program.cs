@@ -7,6 +7,7 @@ using Newtonsoft.Json;
 using Tradier.Client.Models.Account;
 using System.Diagnostics;
 
+
 class Program
 {
 
@@ -18,7 +19,7 @@ class Program
         // Initialize the global list from a JSON file at the start of the program
         LoadStradesFromFile();
 
-        string json = File.ReadAllText("C:\\Users\\steve\\OneDrive\\Code\\tradier-api\\orders.15_04.json");
+        string json = File.ReadAllText("C:\\Users\\steve\\OneDrive\\Code\\tradier-api\\orders.15_00.json");
         var ordersRoot = JsonConvert.DeserializeObject<OrdersRootobject>(json);
         var o = 0;
         var c = 0;
@@ -26,7 +27,7 @@ class Program
         // LINQ query to filter orders
         var filteredOrders = ordersRoot.Orders.Order
             .Where(o => o.Status == "filled" && o.NumLegs == 3)
-            .Where(o => o.Leg.All(l => l.Side.Contains("open")))
+            .Where(o => o.Legs.All(l => l.Side.Contains("open")))
             .OrderBy(o => o.TransactionDate)
             .ToList();
 
@@ -37,7 +38,7 @@ class Program
             var sideType = "c";
             DateTime expiry = DateTime.Now;
             
-            foreach (var leg in order.Leg)
+            foreach (var leg in order.Legs)
             {
                 OptionSymbolHelper.ParseOCCSymbol(leg.OptionSymbol, out string underlying, out DateTime _expiryDate, out string _sideType, out int _strike);
 
