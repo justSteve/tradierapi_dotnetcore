@@ -3,16 +3,16 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using Tradier.Client.Models.Account;
 
-public class Strade
+public class StradeFly
 {
     // Parameterless constructor for EF Core
-    public Strade()
+    public StradeFly()
     {
         Orders = new List<Order>();  // Initialize the Orders list
     }
 
     // Your existing constructor
-    public Strade(int strike, string sideType, DateTime expiry, Order order)
+    public StradeFly(int strike, string sideType, DateTime expiry, Order order)
     {
         Strike = strike;
         Type = sideType;

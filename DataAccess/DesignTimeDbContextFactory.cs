@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.Extensions.Configuration;
 using System.IO;
 
-namespace DataAccess // Change this to your actual namespace
+namespace Tradier.Data
 {
     public class DesignTimeDbContextFactory : IDesignTimeDbContextFactory<TradierDbContext>
     {

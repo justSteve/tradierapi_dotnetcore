@@ -20,7 +20,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\DataAccess\DataAccess.csproj" />
+    <ProjectReference Include="..\DataAccess\Tradier.Data.csproj" />
+    <ProjectReference Include="..\Interfaces\Tradier.Interfaces.csproj" />
     <ProjectReference Include="..\TradierClient2\Tradier.Client.csproj" />
   </ItemGroup>
 

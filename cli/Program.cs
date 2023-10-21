@@ -9,10 +9,25 @@ using Serilog;
 using Serilog.Events;
 using Serilog.Sinks.MSSqlServer;
 using Tradier.Client.Helpers;
-using Tradier.Client.Models.Account;
-
+using Tradier.Client;
+using Tradier.Data;
+using Microsoft.EntityFrameworkCore;
+using Tradier.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
+
+
+// Database setup
+builder.Services.AddDbContext<TradierDbContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+// Register the interface to resolve to the concrete DbContext
+builder.Services.AddScoped<ITradierDbContext>(provider =>
+    provider.GetService(typeof(TradierDbContext)) as ITradierDbContext);
+
+builder.Services.AddTransient<TradierClientFactory>();
+builder.Services.AddTransient<IRequestHandler, RequestHandler>();
+
 var configuration = builder.Configuration;
 string connectionString = configuration.GetConnectionString("DefaultConnection");
 
@@ -44,20 +59,23 @@ SecretManager secretManager = new SecretManager();
 Settings settings = secretManager.LoadSecrets();
 
 // Use the settings object
-var token = settings.ACCESS_TOKEN_pjk;
+var auth = settings.ACCESS_TOKEN_pjk;
 var acct = settings.ACCOUNT_ID_pjk;
 
+var httpClientFactory = app.Services.GetRequiredService<IHttpClientFactory>();
+var httpClient = httpClientFactory.CreateClient();
+
+// Set the base address if it's going to be the same for all requests
+//httpClient.BaseAddress = new Uri("YourTradierAPIBaseUrlHere");
+
+// If there are any headers that are going to be the same for all requests, set them here
+//httpClient.DefaultRequestHeaders.Add("Authorization", "Bearer YourTradierAPITokenHere");
 
 app.MapGet("/", async () =>
 {
-    var httpClientFactory = app.Services.GetRequiredService<IHttpClientFactory>();
-    var httpClient = httpClientFactory.CreateClient();
+    // Use the pre-configured httpClient to make requests
+    var response = await httpClient.GetAsync(auth);
 
-    // Replace with your Tradier API URL and Token
-    var request = new HttpRequestMessage(HttpMethod.Get, "YourTradierAPIUrlHere");
-    request.Headers.Add("Authorization", "Bearer YourTradierAPITokenHere");
-
-    var response = await httpClient.SendAsync(request);
     if (response.IsSuccessStatusCode)
     {
         var content = await response.Content.ReadAsStringAsync();
@@ -71,15 +89,17 @@ app.MapGet("/", async () =>
     return "Hello World!";
 });
 
-// Enable Serilog SelfLog to diagnose issues within Serilog itself
-//Serilog.Debugging.SelfLog.Enable(msg => Console.WriteLine(msg));
 
 app.MapGet("/getbalances", async () =>
 {
 
+    var tradierClientFactory = app.Services.GetRequiredService<TradierClientFactory>();
+
+    //var tradierClientFactory = serviceProvider.GetRequiredService<TradierClientFactory>();
+
     // Initialize your Account object here
-    Tradier.Client.TradierClient client = new Tradier.Client.TradierClient(token, acct);
-    
+    var client = tradierClientFactory.Create(auth, acct, true);
+
     Balances balances = await client.Account.GetBalances();
 
     // Return a simple message or the balances object
@@ -90,71 +110,14 @@ app.MapGet("/getbalances", async () =>
 app.MapGet("/getorders", async () =>
 {
 
+    var tradierClientFactory = app.Services.GetRequiredService<TradierClientFactory>();
     // Initialize your Account object here
-    Tradier.Client.TradierClient client = new Tradier.Client.TradierClient(token, acct);
-    
-    Orders orders = await client.Account.GetOrders();
+    var client = tradierClientFactory.Create(auth, acct, true);
 
+    IEnumerable<Strade> strades = await client.Account.GetStrades();
     // Return a simple message or the balances object
     //
-    return orders;
+    return strades;
 });
 
 app.Run();
-
-//static async Task Main(string[] args)
-//{
-
-//try
-//{
-//    var settingsManager = new cli.Helpers.SecretManager();
-//        var apiSettings = settingsManager.LoadSecrets();
-
-//        TradierClient client = new TradierClient(apiSettings.ACCESS_TOKEN_pjk, apiSettings.ACCOUNT_ID_pjk, true);
-//        Balances balance = await client.Account.GetBalances();
-//    }
-//    catch (Exception ex)
-//    {
-//        Console.WriteLine($"An exception occurred: {ex}");
-//    }
-
-//}
-//////Tradier.Client.TradierClient client = new Tradier.Client.TradierClient("HQkigAvv7GtJEMKcbm5DPlbSUyrp", "VA94955401");
-////// See https://aka.ms/new-console-template for more information
-
-//////Profile userProfile = await client.Account.GetUserProfile();
-//////Positions positions = await client.Account.GetPositions();
-////History history = await client.Account.GetHistory();
-//////GainLoss gainLoss = await client.Account.GetGainLoss();
-////Orders orders = await client.Account.GetOrders();
-//////Order getOrder = await client.Account.GetOrder(orders.Order.FirstOrDefault().Id);
-
-//////Quotes quotes = await client.MarketData.GetQuotes("AAPL, NFLX");
-////Quotes quotes1 = await client.MarketData.PostGetQuotes("aapl");
-
-//////TOSOrder tOrder = ParseTOSOrder("SELL -1 VERTICAL SPX 100 (Weeklys) 27 FEB 23 3980/3975 PUT @1.10 LMT");
-
-
-////Options options = await client.MarketData.GetOptionChain("SPX", "09-29-2023");
-//////Strikes strikes = await client.MarketData.GetStrikes("SPXW", "02-27-2023");
-//////Expirations expirations = await client.MarketData.GetOptionExpirations("AAPL");
-////List<Symbol> lookup = await client.MarketData.LookupOptionSymbols("SPX");
-//////HistoricalQuotes historicalQuotes = await client.MarketData.GetHistoricalQuotes("aapl", "daily", "January 1, 2023", "January 28, 2023");
-//////Series timeSales = await client.MarketData.GetTimeSales("AAPL", "1min", "July 1, 2020", "July 11, 2020");
-//////Securities securities = await client.MarketData.GetEtbSecurities();
-//////Clock clock = await client.MarketData.GetClock();
-//////Calendar calendar = await client.MarketData.GetCalendar();
-//////Securities securitiesFilter = await client.MarketData.SearchCompanies("NY");
-//////Securities lookup1 = await client.MarketData.LookupSymbol("goog");
-
-
-//////OrderPreviewResponse order = (OrderPreviewResponse)await client.Trading.PlaceEquityOrder("WMT", "buy", 10, "limit", "day", 1.00, preview: true);
-//////OrderReponse order1 = (OrderReponse)await client.Trading.PlaceOptionOrder("WMT", "WMT200717C00129000", "buy_to_open", 1, "limit", "day", 10.00);
-////OrderReponse order2 = (OrderReponse)await client.Trading.PlaceMultilegOrder("SPX", "debit", "day", new List<(string, string, int)>
-////{ ("WMT200717C00129000", "buy_to_open", 1), ("WMT200717C00132000", "sell_to_open", 1) }, 1.30);
-//////OrderReponse order3 = (OrderReponse)await client.Trading.PlaceComboOrder("SPY", "limit", "day", new List<(string, string, int)> { ("SPY", "buy", 1), ("SPY140118C00195000", "buy_to_open", 1) }, 1.00);
-//////OrderReponse order4 = (OrderReponse)await client.Trading.PlaceOtoOrder("day", new List<(string, int, string, string, string, double?, double?)> { ("WMT", 1, "limit", "WMT200717C00129000", "buy_to_open", 1.00, null), ("WMT", 1, "limit", "WMT200717C00129000", "sell_to_close", 1.10, null) });
-//////OrderReponse order5 = (OrderReponse)await client.Trading.PlaceOcoOrder("day", new List<(string, int, string, string, string, double?, double?)> { ("SPY", 1, "limit", "SPY140118C00195000", "buy_to_open", 1.00, null), ("SPY", 1, "limit", "SPY140118C00195000", "sell_to_close", 1.10, null) });
-//////OrderReponse order6 = await client.Trading.ModifyOrder(order1.Id, "limit", "day", 5.00);
-//////order1 = await client.Trading.CancelOrder(order1.Id);
-////Console.WriteLine("Hello, World!");

@@ -27,11 +27,14 @@ namespace Tradier.Client.Models.Account
 
     public class Order
     {
+
         [Key]
         [JsonProperty("stradeId")]
         public int StradeId { get; set; }
-        
-        
+
+        public int StradeFlyId { get; set; }
+
+
         [JsonProperty("id")]
         public int Id { get; set; }
 
