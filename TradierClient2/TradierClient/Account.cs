@@ -9,7 +9,9 @@ using Tradier.Interfaces;
 
 using Serilog;
 using Microsoft.EntityFrameworkCore;
-
+using Azure;
+using Tradier.Client.Models.Trading;
+using Tradier.Entities.Models;
 // ReSharper disable once CheckNamespace
 namespace Tradier.Client
 {
@@ -33,7 +35,7 @@ namespace Tradier.Client
         /// <summary>
         /// Account Constructor
         /// </summary>
-        public Account(Requests requests, string defaultAccountNumber, Serilog.ILogger logger = null, ITradierDbContext dbContext = null)
+        public Account(Requests requests, string defaultAccountNumber, Serilog.ILogger logger, string apiToken, ITradierDbContext dbContext)
         {
             _requests = requests;
             _accountNumber = defaultAccountNumber;
@@ -80,14 +82,9 @@ namespace Tradier.Client
                 throw new MissingAccountNumberException();
             }
 
-            if (string.IsNullOrEmpty(accountNumber))
-            {
-                throw new MissingAccountNumberException();
-            }
-
             var response = await _requests.GetRequest($"accounts/{accountNumber}/orders");
 
-            _logger.Information(nameof(response));
+            _logger.Information($"{nameof(GetStrades)}: {response}");
 
             var rsp = JsonConvert.DeserializeObject<OrdersRootobject>(response).Orders;
 
@@ -97,117 +94,187 @@ namespace Tradier.Client
             var o = 0;
             var c = 0;
 
-            // LINQ query to filter orders
-            var filteredOrders = ordersRoot.Orders.Order
+            int? maxId = _dbContext.Orders.Max(s => (int?)s.Id);
+
+            if (maxId.HasValue)
+            {
+                Console.WriteLine($"The highest StradeId is: {maxId.Value}");
+            }
+            else
+            {
+                Console.WriteLine("The table is empty.");
+            }
+
+        // LINQ query to filter orders
+        var filteredOrders = ordersRoot.Orders.Order
                 .Where(o => o.Status == "filled" && o.NumLegs == 3)
-                //.Where(o => o.Legs.All(l => l.Side.Contains("open")))
+                .Where(o => o.Id > maxId )
                 .OrderBy(o => o.TransactionDate)
                 .ToList();
 
 
-            // Print or further process the filtered orders
-            // ... previous code
 
             foreach (var order in filteredOrders)
             {
-                var strike = 0;  // Center strike
-                var sideType = "c";
-                DateTime expiry = DateTime.Now;
-
-                List<int> legStrikes = new List<int>();  // To store all strikes of the order
-
-                foreach (var leg in order.Legs)
+                var strike = 0;
+                var fillClass = order.Class = "option";
+                var fillOS = order.OptionSymbol = "wtf";
+                foreach (var leg1 in order.Legs)
                 {
-                    OptionSymbolHelper.ParseOCCSymbol(leg.OptionSymbol, out string _underlying, out DateTime _expiry, out string _side, out int _strike);
-                    legStrikes.Add(_strike);
-                    if (leg.Side == "sell_to_open")
-                    {
-                        strike = _strike;
-                        expiry = _expiry;
-                    }
+                    var fillClassLeg = leg1.Class = "option";
+                }
+                try
+                {
+                    _dbContext.Orders.Add(order);
+                    var saveChanges = _dbContext.SaveChanges();
+                    
+                }
+                catch (Exception e)
+                {
+                    _logger.Fatal(e.InnerException.ToString());
+                    throw;
                 }
 
-                LoadStrades(_dbContext, expiry);
+            }
+            // Center strike
+            //    var sideType = "c";
+            //    DateTime expiry = DateTime.Now;
 
-                var widthsFromCenter = legStrikes.Select(s => Math.Abs(s - strike)).Distinct().ToList();
-                int width = widthsFromCenter.FirstOrDefault(w => w != 0);
+            //    List<int> legStrikes = new List<int>();  // To store all strikes of the order
+            //    int centerStrike = 0;
+            //    foreach (var leg in order.Legs)
+            //    {
+            //        OptionSymbolHelper.ParseOCCSymbol(leg.OptionSymbol, out string _underlying, out DateTime _expiry, out string _side, out int _strike);
+            //        legStrikes.Add(_strike);
+            //        if (leg.Side == "sell_to_open")
+            //        {
+            //            sideType = _side;
+            //            centerStrike = _strike;
+            //            strike = _strike;
+            //            expiry = _expiry;
+            //        }
+            //    }
 
-                bool foundExistingStrade = false;
-                foreach (var strade in GlobalStradesList)
+            //    var thisStrage = LoadStrade(expiry, centerStrike, sideType, order);
+
+            //    var widthsFromCenter = legStrikes.Select(s => Math.Abs(s - strike)).Distinct().ToList();
+            //    int width = widthsFromCenter.FirstOrDefault(w => w != 0);
+
+            //    bool foundExistingStrade = false;
+            //    foreach (var strade in GlobalStradesList)
+            //    {
+            //        if (strike == strade.Strike)
+            //        {
+            //            foundExistingStrade = true;
+            //            bool foundExistingFly = false;
+            //            foreach (var fly in strade.Flies)
+            //            {
+            //                // Compute the width for the fly based on the first order's legs
+            //                var flyWidths = fly.Orders.First().Legs.Select(l =>
+            //                {
+            //                    OptionSymbolHelper.ParseOCCSymbol(l.OptionSymbol, out _, out _, out _, out int _strike);
+            //                    return Math.Abs(_strike - strike);
+            //                }).Distinct().ToList();
+
+            //                //var flyWidths = fly.Orders.First().Legs.Select(l => Math.Abs(l.Strike - strike)).Distinct().ToList();
+            //                int flyWidth = flyWidths.FirstOrDefault(w => w != 0);
+
+            //                if (flyWidth == width)
+            //                {
+            //                    foundExistingFly = true;
+            //                    fly.Orders.Add(order);
+            //                    break;
+            //                }
+            //            }
+
+            //            if (!foundExistingFly)
+            //            {
+            //                var newFly = new StradeFly(strike, sideType, expiry, order);
+            //                strade.Flies.Add(newFly);
+            //            }
+
+            //            break;
+            //        }
+            //    }
+
+            //    if (!foundExistingStrade)
+            //    {
+            //        var newStrade = new Strade
+            //        {
+            //            Strike = strike,
+            //            CallPut = sideType,
+            //            Expiry = expiry,
+            //            Flies = new List<StradeFly>
+            //        {
+            //            new StradeFly(strike, sideType, expiry, order)
+            //        }
+            //        };
+            //        GlobalStradesList.Add(newStrade);
+            //    }
+            //}
+            return null;
+        }
+
+        private Strade LoadStrade(DateTime expiry, int centerStrike, string sideType, Order order)
+        {
+
+            try
+            {
+                var strade = _dbContext.Strades
+                    .Include(s => s.Flies)
+                        .ThenInclude(f => f.SOrders) // If you also want to load the Orders
+                    .Where(s => s.Expiry == expiry)
+                    .Where(s => s.CallPut == sideType)
+                    .Where(s => s.Strike == centerStrike)
+                    .SingleOrDefault()
+                    ;
+                _logger.Information($"{nameof(LoadStrade)}: {strade}");
+                if (strade == null)
                 {
-                    if (strike == strade.Strike)
-                    {
-                        foundExistingStrade = true;
-                        bool foundExistingFly = false;
-                        foreach (var fly in strade.Flies)
-                        {
-                            // Compute the width for the fly based on the first order's legs
-                            var flyWidths = fly.Orders.First().Legs.Select(l =>
-                            {
-                                OptionSymbolHelper.ParseOCCSymbol(l.OptionSymbol, out _, out _, out _, out int _strike);
-                                return Math.Abs(_strike - strike);
-                            }).Distinct().ToList();
-
-                            //var flyWidths = fly.Orders.First().Legs.Select(l => Math.Abs(l.Strike - strike)).Distinct().ToList();
-                            int flyWidth = flyWidths.FirstOrDefault(w => w != 0);
-
-                            if (flyWidth == width)
-                            {
-                                foundExistingFly = true;
-                                fly.Orders.Add(order);
-                                break;
-                            }
-                        }
-
-                        if (!foundExistingFly)
-                        {
-                            var newFly = new StradeFly(strike, sideType, expiry, order);
-                            strade.Flies.Add(newFly);
-                        }
-
-                        break;
-                    }
+                    return CreateStrade(expiry, centerStrike, sideType, order);
                 }
-
-                if (!foundExistingStrade)
+                else
                 {
-                    var newStrade = new Strade
-                    {
-                        Strike = strike,
-                        Type = sideType,
-                        Expiry = expiry,
-                        Flies = new List<StradeFly>
-                    {
-                        new StradeFly(strike, sideType, expiry, order)
-                    }
-                    };
-                    GlobalStradesList.Add(newStrade);
+                    return strade;
                 }
             }
-            return null;
-
-
-        }
-
-        IEnumerable<Strade> LoadStrades(ITradierDbContext context, DateTime targetDate)
-        {
-            return context.Strades
-                .Include(s => s.Flies)
-                    .ThenInclude(f => f.Orders) // If you also want to load the Orders
-                .Where(s => s.Expiry == targetDate);
-
-        }
-
-        private static void CreateStrade(int strike, string sideType, DateTime expiry, StradeFly fly)
-        {
-            var strade = new Strade
+            catch (Exception e)
             {
-                Strike = strike,
-                Type = sideType,
-                Expiry = expiry,
-                Flies = new List<StradeFly> { fly }
-            };
-            GlobalStradesList.Add(strade);
+                _logger.Fatal($"LoadStrade: {e}");
+                throw;
+            }
+
+
+        }
+        private Strade CreateStrade(DateTime expiry, int centerStrike, string sideType, Order order)
+        {
+            return null;
+            //try
+            //{
+            //    var strade = new Strade
+            //    {
+            //        Strike = centerStrike,
+            //        CallPut = sideType,
+            //        Expiry = expiry,
+            //        Flies = new List<StradeFly>
+            //        {
+            //            new StradeFly(centerStrike, sideType, expiry, order)
+            //        }
+
+            //    };
+            //    _logger.Information($"{nameof(CreateStrade)}: {strade}");
+
+            //    _dbContext.Strades.Add(strade);
+            //    _dbContext.SaveChanges();
+
+            //    return strade;
+            //}
+            //catch (Exception e)
+            //{
+            //    _logger.Fatal($"{nameof(CreateStrade)}: {e}");
+            //    throw;
+            //}
+
         }
 
 

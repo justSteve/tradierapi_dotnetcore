@@ -5,7 +5,7 @@ using Tradier.Client.Helpers;
 using System.ComponentModel.DataAnnotations;
 
 
-namespace Tradier.Client.Models.Account
+namespace Tradier.Entities.Models
 {
 
     public class OrdersRootobject
@@ -27,12 +27,13 @@ namespace Tradier.Client.Models.Account
 
     public class Order
     {
-
         [Key]
-        [JsonProperty("stradeId")]
-        public int StradeId { get; set; }
+        public int DatabaseId { get; set; }  // SQL Server-generated primary key
 
-        public int StradeFlyId { get; set; }
+        [JsonProperty("stradeId")]
+        public int? StradeId { get; set; }
+
+        public int? StradeFlyId { get; set; }  // Nullable foreign key to StradeFly
 
 
         [JsonProperty("id")]
@@ -116,13 +117,14 @@ namespace Tradier.Client.Models.Account
     public class Leg
     {
         [Key]
+        public int DatabaseId { get; set; }  // SQL Server-generated primary key
+
+        public int DatabaseOrderId { get; set; }  // Foreign key referencing Order
+
+
         [JsonProperty("id")]
         public int Id { get; set; }
 
-
-        [JsonProperty("orderId")]
-        public int OrderId { get; set; }
-        
 
         [JsonProperty("type")]
 

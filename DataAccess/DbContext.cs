@@ -1,8 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Tradier.Client.Models.Account;  // Adjust this based on where your models are actually located
 using Tradier.Interfaces;
-using Tradier.Entities;
-//using Tradier.Client.Models.Account.OrdersFromPy;  // Adjust this based on where your models are actually located
+using Tradier.Entities.Models;
+
 
 namespace Tradier.Data
 {
@@ -14,15 +14,26 @@ namespace Tradier.Data
         {
         }
 
-        //dotnet ef migrations add IniCreate -p ..\DataAccess\DataAccess.csproj -s cli.csproj
-        //dotnet ef database update -c TradierDbContext -p..\DataAccess\DataAccess.csproj -s cli.csproj
+        //dotnet ef migrations add MakeOrderForeignKeyNullable -p ..\DataAccess\Tradier.Data.csproj -s cli.csproj
+        //dotnet ef database update -c TradierDbContext -p..\DataAccess\Tradier.Data.csproj -s cli.csproj
         public DbSet<Balances> Balances { get; set; }
-        //public DbSet<TradierOrder> TradierOrder { get; set; }
         public DbSet<Order> Orders { get; set; }
+        public DbSet<SOrder> SOrders { get; set; }
         public DbSet<Strade> Strades { get; set; }
         public DbSet<StradeFly> StradeFly { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            modelBuilder.Entity<Order>()
+                .HasKey(o => o.DatabaseId);  // Use DatabaseId as the primary key
+
+            modelBuilder.Entity<Leg>()
+                .HasKey(l => l.DatabaseId);  // Use DatabaseId as the primary key
+
+            modelBuilder.Entity<Order>()
+                .HasMany(o => o.Legs)
+                .WithOne()
+                .HasForeignKey(l => l.DatabaseOrderId)  // Use DatabaseOrderId as the foreign key
+                .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<Strade>()
                 .HasMany(s => s.Flies)
@@ -30,18 +41,21 @@ namespace Tradier.Data
                  .HasForeignKey(f => f.StradeId);
 
             modelBuilder.Entity<StradeFly>()
-                .HasMany(f => f.Orders)
+                .HasMany(s => s.SOrders)
                 .WithOne()
-                .HasForeignKey(o => o.StradeFlyId);
+                .HasForeignKey(o => o.StradeFlyId)
+                .IsRequired(false);  // Indicate that the foreign key is optional
 
 
-            modelBuilder.Entity<Order>()
-                .HasMany(o => o.Legs) // Assumes Legs is a collection in Order
-                .WithOne()
-                .HasForeignKey(l => l.OrderId)
-                .OnDelete(DeleteBehavior.Restrict);  // <-- Add this line
+            modelBuilder.Entity<SOrder>()
+                    .HasMany(o => o.SLegs) // Assumes Legs is a collection in Order
+                    .WithOne()
+                    .HasForeignKey(l => l.OrderId)
+                    .OnDelete(DeleteBehavior.Restrict);  // <-- Add this line
 
-
+            modelBuilder.Entity<SLeg>()
+                    .Property(p => p.Id)
+                    .ValueGeneratedOnAdd();
 
             modelBuilder.Entity<Balances>()
                 .HasOne(b => b.Margin)

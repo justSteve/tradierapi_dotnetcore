@@ -1,31 +1,38 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using Tradier.Client.Models.Account;
 
-public class StradeFly
+namespace Tradier.Entities.Models
 {
-    // Parameterless constructor for EF Core
-    public StradeFly()
+    public class StradeFly
     {
-        Orders = new List<Order>();  // Initialize the Orders list
-    }
+        // Parameterless constructor for EF Core
+        public StradeFly()
+        {
+            SOrders = new List<SOrder>();  // Initialize the Orders list
 
-    // Your existing constructor
-    public StradeFly(int strike, string sideType, DateTime expiry, Order order)
-    {
-        Strike = strike;
-        Type = sideType;
-        Expry = expiry;
-        Orders = new List<Order>();  // Initialize the Orders list
-        Orders.Add(order);
-    }
+        }
 
-    [Key]
-    public int StradeId { get; set; } // db identifier
-    public int Strike { get; set; }  // of the underlying
-    public float PNL { get; set; }  // cumulative Profit / Loss of children
-    public string Type { get; set; } // 'call' or 'put'
-    public DateTime Expry { get; set; } // Expiry date
-    public List<Order> Orders { get; set; } // List of TradierOrder instances
+        // Your existing constructor
+        public StradeFly(int strike, string sideType, DateTime expiry, SOrder order)
+        {
+            Strike = strike;
+            CallPut = sideType;
+            Expry = expiry;
+            SOrders = new List<SOrder>();  // Initialize the Orders list
+            SOrders.Add(order);
+        }
+
+        [Key]
+        public int StradeFlyId { get; set; } // db identifier
+        public int StradeId { get; set; } // db identifier
+        public int Strike { get; set; }  // of the underlying
+        public int QtyContractsOpen { get; set; }
+        public int QtyContractsClosed { get; set; }
+        public float PNLOpen { get; set; }
+        public float PNLClosed { get; set; }
+        public string CallPut { get; set; } // 'call' or 'put'
+        public DateTime Expry { get; set; } // Expiry date
+        public List<SOrder> SOrders { get; set; } // List of TradierOrder instances
+    }
 }

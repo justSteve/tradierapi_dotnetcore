@@ -13,6 +13,8 @@ using Tradier.Client;
 using Tradier.Data;
 using Microsoft.EntityFrameworkCore;
 using Tradier.Interfaces;
+using Tradier.Entities.Models;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
