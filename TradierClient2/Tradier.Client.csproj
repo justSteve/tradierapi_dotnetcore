@@ -33,6 +33,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Interfaces\Tradier.Interfaces.csproj" />
+    <ProjectReference Include="..\SharedHelpers2\SharedHelpers2.csproj" />
     <ProjectReference Include="..\Tradier.Entities\Tradier.Entities.csproj" />
   </ItemGroup>
 

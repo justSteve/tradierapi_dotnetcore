@@ -14,18 +14,18 @@ namespace Tradier.Entities.Models
         }
 
         // Your existing constructor
-        public StradeFly(int strike, string sideType, DateTime expiry, SOrder order)
+        public StradeFly(int strike, string sideType, DateTime expry, SOrder order)
         {
             Strike = strike;
             CallPut = sideType;
-            Expry = expiry;
+            Expry = expry;
             SOrders = new List<SOrder>();  // Initialize the Orders list
             SOrders.Add(order);
         }
 
         [Key]
-        public int StradeFlyId { get; set; } // db identifier
-        public int StradeId { get; set; } // db identifier
+        public int Id { get; set; } // db identifier
+        //public int StradeId { get; set; } // db identifier
         public int Strike { get; set; }  // of the underlying
         public int QtyContractsOpen { get; set; }
         public int QtyContractsClosed { get; set; }

@@ -10,18 +10,19 @@ namespace Tradier.Interfaces
 {
     public interface ITradierDbContext
     {
-        public DbSet<Strade> Strades { get; set; } 
         public DbSet<Balances> Balances { get; set; }
         public DbSet<Order> Orders { get; set; }
         public DbSet<SOrder> SOrders { get; set; }
-        public DbSet<StradeFly> StradeFly { get; set; }
-        // Add other DbSet properties for other entities as needed
+        //public DbSet<Strade> Strades { get; set; }
+        //public DbSet<StradeFly> StradeFly { get; set; }
 
         int SaveChanges();
 
         Task<int> SaveChangesAsync(CancellationToken cancellationToken = default(CancellationToken));
 
-        // Optionally, if you use more DbContext methods, add them here
+        //void SetupWarnings(DbContextOptionsBuilder optionsBuilder = null);
+
+
     }
 }
 

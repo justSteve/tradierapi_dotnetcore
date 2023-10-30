@@ -11,24 +11,26 @@ namespace Tradier.Entities.Models
         {
             Flies = new List<StradeFly>(); // Initialize the Flies list
         }
-        public Strade(int strike, string sideType, DateTime expiry, StradeFly fly)
+        public Strade(int strike, string sideType, DateTime expry, StradeFly fly)
         {
             this.Strike = strike;
             this.CallPut = sideType;
-            this.Expiry = expiry;
+            this.Expry = expry;
             this.Flies = new List<StradeFly> { fly };
         }
 
         [Key]
-        public int StradeId { get; set; } // db identifier
+        public int Id { get; set; } // db identifier
+        //public int StradeId { get; set; }
+        public string TOSNotation {get; set;}
         public int Strike { get; set; }  // of the underlying
         public string CallPut { get; set; } // 'call' or 'put'
-        public DateTime Expiry { get; set; } // Expiry date
         public int QtyContractsOpen { get; set; }
         public int QtyContractsClosed { get; set; }
         public float PNLOpen { get; set; }
         public float PNLClosed { get; set; }
         public float MaxProfitYetToGain { get; set; }
         public List<StradeFly> Flies { get; set; } // List of StradeFly instances
+        public DateTime Expry { get; set; }
     }
 }

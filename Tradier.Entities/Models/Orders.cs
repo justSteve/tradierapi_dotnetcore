@@ -30,14 +30,14 @@ namespace Tradier.Entities.Models
         [Key]
         public int DatabaseId { get; set; }  // SQL Server-generated primary key
 
-        [JsonProperty("stradeId")]
-        public int? StradeId { get; set; }
+        //[JsonProperty("stradeId")]
+        //public int? StradeId { get; set; }
 
-        public int? StradeFlyId { get; set; }  // Nullable foreign key to StradeFly
+        //public int? StradeFlyId { get; set; }  // Nullable foreign key to StradeFly
 
 
         [JsonProperty("id")]
-        public int Id { get; set; }
+        public int Id { get; set; } // 
 
         [JsonProperty("type")]
 

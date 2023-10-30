@@ -5,9 +5,10 @@ namespace SharedHelpers2
 {
     public static class OptionSymbolHelper
     {
-        public static void ParseOCCSymbol(string optionSymbol, out string underlying, out DateTime expiryDate, out string sideType, out int strike)
-        {;
-            string format = "yymmdd";  // Adjust the format as needed
+        public static void ParseOCCSymbol(string optionSymbol, out string underlying, out DateTime expryDate, out string putCall, out int strike)
+        {
+            ;
+            string format = "yyMMdd";  // Adjust the format as needed
 
             // Regular expression to separate alphabets and digits in the OCC symbol
             Regex regex = new Regex("([a-zA-Z]+|[0-9]+)");
@@ -16,26 +17,26 @@ namespace SharedHelpers2
                 var matches = regex.Matches(optionSymbol);
 
                 underlying = matches[0].Value;  // The first match is the underlying asset
-                bool isValidDate = DateTime.TryParseExact(matches[1].Value, format, null, System.Globalization.DateTimeStyles.None, out expiryDate);
-                //if (isValidDate)
-                //{
-                //    expiryDate = 
-                //}
-                //else
-                //{
-                //    // Handle the invalid date string
-                //}
-                sideType = matches[2].Value;    // The third match is the option type ('P' or 'C')
+                bool isValidDate = DateTime.TryParseExact(matches[1].Value, format, null, System.Globalization.DateTimeStyles.None, out expryDate);
 
-                // Extract the strike price, skipping any leading zeros and keeping the next four digits
-                string rawStrike = matches[3].Value.TrimStart('0').Substring(0, 4);
+                putCall = matches[2].Value;    // The third match is the option type ('P' or 'C')
+
+                string rawStrike = "NotSPX";
+
+                if (underlying.StartsWith("SPX"))
+                {
+                    // Extract the strike price, skipping any leading zeros and keeping the next four digits
+                    rawStrike = matches[3].Value.TrimStart('0').Substring(0, 4);
+                }
+
+                // if it's not SPX will raise exception
                 strike = int.Parse(rawStrike);  // Convert to an integer for the actual strike price
             }
             catch (Exception e)
             {
                 underlying = "error";
-                expiryDate = DateTime.UtcNow;  // The second match is the expiration date
-                sideType = e.Message;    // The third match is the option type ('P' or 'C')
+                expryDate = DateTime.UtcNow;  // The second match is the expiration date
+                putCall = e.Message;    // The third match is the option type ('P' or 'C')
 
                 strike = 0;
             }

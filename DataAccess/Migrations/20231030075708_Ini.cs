@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Tradier.Data.Migrations
 {
     /// <inheritdoc />
-    public partial class ini : Migration
+    public partial class Ini : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -50,8 +50,6 @@ namespace Tradier.Data.Migrations
                 {
                     DatabaseId = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    StradeId = table.Column<int>(type: "int", nullable: true),
-                    StradeFlyId = table.Column<int>(type: "int", nullable: true),
                     Id = table.Column<int>(type: "int", nullable: false),
                     Type = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Symbol = table.Column<string>(type: "nvarchar(max)", nullable: false),
@@ -95,23 +93,28 @@ namespace Tradier.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Strades",
+                name: "SOrders",
                 columns: table => new
                 {
-                    StradeId = table.Column<int>(type: "int", nullable: false)
+                    Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    Strike = table.Column<int>(type: "int", nullable: false),
-                    CallPut = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Expiry = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    QtyContractsOpen = table.Column<int>(type: "int", nullable: false),
-                    QtyContractsClosed = table.Column<int>(type: "int", nullable: false),
-                    PNLOpen = table.Column<float>(type: "real", nullable: false),
-                    PNLClosed = table.Column<float>(type: "real", nullable: false),
-                    MaxProfitYetToGain = table.Column<float>(type: "real", nullable: false)
+                    brokerId = table.Column<int>(type: "int", nullable: false),
+                    StradeFlyId = table.Column<int>(type: "int", nullable: true),
+                    CreditDebit = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Symbol = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    CreateDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    ExpryDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    TransactionDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    NumLegs = table.Column<int>(type: "int", nullable: false),
+                    NumContracts = table.Column<int>(type: "int", nullable: false),
+                    Strategy = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    OpenClosed = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Price = table.Column<float>(type: "real", nullable: false),
+                    TOSString = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Strades", x => x.StradeId);
+                    table.PrimaryKey("PK_SOrders", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -203,65 +206,14 @@ namespace Tradier.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "StradeFly",
-                columns: table => new
-                {
-                    StradeFlyId = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    StradeId = table.Column<int>(type: "int", nullable: false),
-                    Strike = table.Column<int>(type: "int", nullable: false),
-                    QtyContractsOpen = table.Column<int>(type: "int", nullable: false),
-                    QtyContractsClosed = table.Column<int>(type: "int", nullable: false),
-                    PNLOpen = table.Column<float>(type: "real", nullable: false),
-                    PNLClosed = table.Column<float>(type: "real", nullable: false),
-                    CallPut = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Expry = table.Column<DateTime>(type: "datetime2", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_StradeFly", x => x.StradeFlyId);
-                    table.ForeignKey(
-                        name: "FK_StradeFly_Strades_StradeId",
-                        column: x => x.StradeId,
-                        principalTable: "Strades",
-                        principalColumn: "StradeId",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "SOrders",
-                columns: table => new
-                {
-                    StradeId = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    StradeFlyId = table.Column<int>(type: "int", nullable: true),
-                    Id = table.Column<int>(type: "int", nullable: false),
-                    CreditDebit = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Symbol = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    CreateDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    TransactionDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    NumLegs = table.Column<int>(type: "int", nullable: false),
-                    Strategy = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    OpenClosed = table.Column<string>(type: "nvarchar(max)", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_SOrders", x => x.StradeId);
-                    table.ForeignKey(
-                        name: "FK_SOrders_StradeFly_StradeFlyId",
-                        column: x => x.StradeFlyId,
-                        principalTable: "StradeFly",
-                        principalColumn: "StradeFlyId");
-                });
-
-            migrationBuilder.CreateTable(
                 name: "SLeg",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    OrderId = table.Column<int>(type: "int", nullable: false),
-                    CreditDebit = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    brokerId = table.Column<int>(type: "int", nullable: false),
+                    brokerOrderId = table.Column<int>(type: "int", nullable: false),
+                    orderId = table.Column<int>(type: "int", nullable: false),
                     BuySell = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     OpenClose = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     QuantityOrdered = table.Column<float>(type: "real", nullable: false),
@@ -272,16 +224,20 @@ namespace Tradier.Data.Migrations
                     ThisFillPrice = table.Column<float>(type: "real", nullable: false),
                     ThisFillQuantity = table.Column<float>(type: "real", nullable: false),
                     RemainingQuantity = table.Column<float>(type: "real", nullable: false),
-                    OptionSymbol = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    OptionSymbol = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Underlying = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Strike = table.Column<int>(type: "int", nullable: false),
+                    PutCall = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Expry = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_SLeg", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_SLeg_SOrders_OrderId",
-                        column: x => x.OrderId,
+                        name: "FK_SLeg_SOrders_orderId",
+                        column: x => x.orderId,
                         principalTable: "SOrders",
-                        principalColumn: "StradeId",
+                        principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                 });
 
@@ -316,19 +272,9 @@ namespace Tradier.Data.Migrations
                 column: "DatabaseOrderId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_SLeg_OrderId",
+                name: "IX_SLeg_orderId",
                 table: "SLeg",
-                column: "OrderId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_SOrders_StradeFlyId",
-                table: "SOrders",
-                column: "StradeFlyId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_StradeFly_StradeId",
-                table: "StradeFly",
-                column: "StradeId");
+                column: "orderId");
         }
 
         /// <inheritdoc />
@@ -357,12 +303,6 @@ namespace Tradier.Data.Migrations
 
             migrationBuilder.DropTable(
                 name: "SOrders");
-
-            migrationBuilder.DropTable(
-                name: "StradeFly");
-
-            migrationBuilder.DropTable(
-                name: "Strades");
         }
     }
 }

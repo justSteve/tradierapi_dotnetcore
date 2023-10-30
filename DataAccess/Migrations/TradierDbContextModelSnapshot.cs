@@ -301,12 +301,6 @@ namespace Tradier.Data.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("StradeFlyId")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("StradeId")
-                        .HasColumnType("int");
-
                     b.Property<string>("Strategy")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -370,9 +364,8 @@ namespace Tradier.Data.Migrations
                     b.Property<float>("CostBasis")
                         .HasColumnType("real");
 
-                    b.Property<string>("CreditDebit")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<DateTime>("Expry")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("OpenClose")
                         .IsRequired()
@@ -382,8 +375,9 @@ namespace Tradier.Data.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("OrderId")
-                        .HasColumnType("int");
+                    b.Property<string>("PutCall")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<float>("QuantityExecuted")
                         .HasColumnType("real");
@@ -400,26 +394,42 @@ namespace Tradier.Data.Migrations
                     b.Property<float>("RemainingQuantity")
                         .HasColumnType("real");
 
+                    b.Property<int>("Strike")
+                        .HasColumnType("int");
+
                     b.Property<float>("ThisFillPrice")
                         .HasColumnType("real");
 
                     b.Property<float>("ThisFillQuantity")
                         .HasColumnType("real");
 
+                    b.Property<string>("Underlying")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("brokerId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("brokerOrderId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("orderId")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
 
-                    b.HasIndex("OrderId");
+                    b.HasIndex("orderId");
 
                     b.ToTable("SLeg");
                 });
 
             modelBuilder.Entity("Tradier.Entities.Models.SOrder", b =>
                 {
-                    b.Property<int>("StradeId")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("StradeId"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<DateTime>("CreateDate")
                         .HasColumnType("datetime2");
@@ -428,7 +438,10 @@ namespace Tradier.Data.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("Id")
+                    b.Property<DateTime>("ExpryDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("NumContracts")
                         .HasColumnType("int");
 
                     b.Property<int>("NumLegs")
@@ -437,6 +450,9 @@ namespace Tradier.Data.Migrations
                     b.Property<string>("OpenClosed")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<float>("Price")
+                        .HasColumnType("real");
 
                     b.Property<int?>("StradeFlyId")
                         .HasColumnType("int");
@@ -449,92 +465,19 @@ namespace Tradier.Data.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("TOSString")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<DateTime>("TransactionDate")
                         .HasColumnType("datetime2");
 
-                    b.HasKey("StradeId");
+                    b.Property<int>("brokerId")
+                        .HasColumnType("int");
 
-                    b.HasIndex("StradeFlyId");
+                    b.HasKey("Id");
 
                     b.ToTable("SOrders");
-                });
-
-            modelBuilder.Entity("Tradier.Entities.Models.Strade", b =>
-                {
-                    b.Property<int>("StradeId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("StradeId"));
-
-                    b.Property<string>("CallPut")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("Expiry")
-                        .HasColumnType("datetime2");
-
-                    b.Property<float>("MaxProfitYetToGain")
-                        .HasColumnType("real");
-
-                    b.Property<float>("PNLClosed")
-                        .HasColumnType("real");
-
-                    b.Property<float>("PNLOpen")
-                        .HasColumnType("real");
-
-                    b.Property<int>("QtyContractsClosed")
-                        .HasColumnType("int");
-
-                    b.Property<int>("QtyContractsOpen")
-                        .HasColumnType("int");
-
-                    b.Property<int>("Strike")
-                        .HasColumnType("int");
-
-                    b.HasKey("StradeId");
-
-                    b.ToTable("Strades");
-                });
-
-            modelBuilder.Entity("Tradier.Entities.Models.StradeFly", b =>
-                {
-                    b.Property<int>("StradeFlyId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("StradeFlyId"));
-
-                    b.Property<string>("CallPut")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("Expry")
-                        .HasColumnType("datetime2");
-
-                    b.Property<float>("PNLClosed")
-                        .HasColumnType("real");
-
-                    b.Property<float>("PNLOpen")
-                        .HasColumnType("real");
-
-                    b.Property<int>("QtyContractsClosed")
-                        .HasColumnType("int");
-
-                    b.Property<int>("QtyContractsOpen")
-                        .HasColumnType("int");
-
-                    b.Property<int>("StradeId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("Strike")
-                        .HasColumnType("int");
-
-                    b.HasKey("StradeFlyId");
-
-                    b.HasIndex("StradeId");
-
-                    b.ToTable("StradeFly");
                 });
 
             modelBuilder.Entity("Tradier.Entities.Models.Balances", b =>
@@ -577,24 +520,8 @@ namespace Tradier.Data.Migrations
                 {
                     b.HasOne("Tradier.Entities.Models.SOrder", null)
                         .WithMany("SLegs")
-                        .HasForeignKey("OrderId")
+                        .HasForeignKey("orderId")
                         .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("Tradier.Entities.Models.SOrder", b =>
-                {
-                    b.HasOne("Tradier.Entities.Models.StradeFly", null)
-                        .WithMany("SOrders")
-                        .HasForeignKey("StradeFlyId");
-                });
-
-            modelBuilder.Entity("Tradier.Entities.Models.StradeFly", b =>
-                {
-                    b.HasOne("Tradier.Entities.Models.Strade", null)
-                        .WithMany("Flies")
-                        .HasForeignKey("StradeId")
-                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 
@@ -606,16 +533,6 @@ namespace Tradier.Data.Migrations
             modelBuilder.Entity("Tradier.Entities.Models.SOrder", b =>
                 {
                     b.Navigation("SLegs");
-                });
-
-            modelBuilder.Entity("Tradier.Entities.Models.Strade", b =>
-                {
-                    b.Navigation("Flies");
-                });
-
-            modelBuilder.Entity("Tradier.Entities.Models.StradeFly", b =>
-                {
-                    b.Navigation("SOrders");
                 });
 #pragma warning restore 612, 618
         }

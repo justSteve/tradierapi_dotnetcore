@@ -25,7 +25,7 @@ namespace Tradier.Entities.Helpers
             //sLeg.OrderId = leg.OrderId;
 
             // CreditDebit - Assuming a simplistic transformation based on 'Type' for demonstration
-            sLeg.CreditDebit = (leg.Side.StartsWith("sell")) ? "Credit" : "Debit";
+            //sLeg.CreditDebit = (leg.Side.StartsWith("sell")) ? "Credit" : "Debit";
 
             // BuySell
             sLeg.BuySell = leg.Side;
