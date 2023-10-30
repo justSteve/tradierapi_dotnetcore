@@ -477,7 +477,83 @@ namespace Tradier.Data.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("StradeFlyId");
+
                     b.ToTable("SOrders");
+                });
+
+            modelBuilder.Entity("Tradier.Entities.Models.Strade", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("CallPut")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("Expry")
+                        .HasColumnType("datetime2");
+
+                    b.Property<float>("MaxProfitYetToGain")
+                        .HasColumnType("real");
+
+                    b.Property<float>("PNLClosed")
+                        .HasColumnType("real");
+
+                    b.Property<float>("PNLOpen")
+                        .HasColumnType("real");
+
+                    b.Property<int>("QtyContractsClosed")
+                        .HasColumnType("int");
+
+                    b.Property<int>("QtyContractsOpen")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Strike")
+                        .HasColumnType("int");
+
+                    b.Property<string>("TOSNotation")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Strades");
+                });
+
+            modelBuilder.Entity("Tradier.Entities.Models.StradeFly", b =>
+                {
+                    b.Property<int>("Id")
+                        .HasColumnType("int");
+
+                    b.Property<string>("CallPut")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("Expry")
+                        .HasColumnType("datetime2");
+
+                    b.Property<float>("PNLClosed")
+                        .HasColumnType("real");
+
+                    b.Property<float>("PNLOpen")
+                        .HasColumnType("real");
+
+                    b.Property<int>("QtyContractsClosed")
+                        .HasColumnType("int");
+
+                    b.Property<int>("QtyContractsOpen")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Strike")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("StradeFly");
                 });
 
             modelBuilder.Entity("Tradier.Entities.Models.Balances", b =>
@@ -525,6 +601,22 @@ namespace Tradier.Data.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("Tradier.Entities.Models.SOrder", b =>
+                {
+                    b.HasOne("Tradier.Entities.Models.StradeFly", null)
+                        .WithMany("SOrders")
+                        .HasForeignKey("StradeFlyId");
+                });
+
+            modelBuilder.Entity("Tradier.Entities.Models.StradeFly", b =>
+                {
+                    b.HasOne("Tradier.Entities.Models.Strade", null)
+                        .WithMany("Flies")
+                        .HasForeignKey("Id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("Tradier.Entities.Models.Order", b =>
                 {
                     b.Navigation("Legs");
@@ -533,6 +625,16 @@ namespace Tradier.Data.Migrations
             modelBuilder.Entity("Tradier.Entities.Models.SOrder", b =>
                 {
                     b.Navigation("SLegs");
+                });
+
+            modelBuilder.Entity("Tradier.Entities.Models.Strade", b =>
+                {
+                    b.Navigation("Flies");
+                });
+
+            modelBuilder.Entity("Tradier.Entities.Models.StradeFly", b =>
+                {
+                    b.Navigation("SOrders");
                 });
 #pragma warning restore 612, 618
         }

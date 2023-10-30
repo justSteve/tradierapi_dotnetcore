@@ -16,11 +16,14 @@ namespace Tradier.Data
 
         //dotnet ef migrations add Ini -p ..\DataAccess\Tradier.Data.csproj -s cli.csproj
         //dotnet ef database update -c TradierDbContext
+        //sqlcmd -S MSSQLLocalDB -E  -Q "DROP DATABASE OptionsTracker"
+
+
         public DbSet<Balances> Balances { get; set; }
         public DbSet<Order> Orders { get; set; }
         public DbSet<SOrder> SOrders { get; set; }
-        //public DbSet<Strade> Strades { get; set; }
-        //public DbSet<StradeFly> StradeFly { get; set; }
+        public DbSet<Strade> Strades { get; set; }
+        public DbSet<StradeFly> StradeFly { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<Order>()
@@ -35,16 +38,16 @@ namespace Tradier.Data
                 .HasForeignKey(l => l.DatabaseOrderId)  // Use DatabaseOrderId as the foreign key
                 .OnDelete(DeleteBehavior.Restrict);
 
-            //modelBuilder.Entity<Strade>()
-            //    .HasMany(s => s.Flies)
-            //    .WithOne()
-            //     .HasForeignKey(f => f.StradeId);
+            modelBuilder.Entity<Strade>()
+                .HasMany(s => s.Flies)
+                .WithOne()
+                 .HasForeignKey(f => f.Id);
 
-            //modelBuilder.Entity<StradeFly>()
-            //    .HasMany(s => s.SOrders)
-            //    .WithOne()
-            //    .HasForeignKey(o => o.StradeId)
-            //    .IsRequired(false);  // Indicate that the foreign key is optional
+            modelBuilder.Entity<StradeFly>()
+                .HasMany(s => s.SOrders)
+                .WithOne()
+                .HasForeignKey(o => o.StradeFlyId)
+                .IsRequired(false);  // Indicate that the foreign key is optional
 
 
             modelBuilder.Entity<SOrder>()

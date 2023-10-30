@@ -93,28 +93,24 @@ namespace Tradier.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "SOrders",
+                name: "Strades",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    brokerId = table.Column<int>(type: "int", nullable: false),
-                    StradeFlyId = table.Column<int>(type: "int", nullable: true),
-                    CreditDebit = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Symbol = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    CreateDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    ExpryDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    TransactionDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    NumLegs = table.Column<int>(type: "int", nullable: false),
-                    NumContracts = table.Column<int>(type: "int", nullable: false),
-                    Strategy = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    OpenClosed = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Price = table.Column<float>(type: "real", nullable: false),
-                    TOSString = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    TOSNotation = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Strike = table.Column<int>(type: "int", nullable: false),
+                    CallPut = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    QtyContractsOpen = table.Column<int>(type: "int", nullable: false),
+                    QtyContractsClosed = table.Column<int>(type: "int", nullable: false),
+                    PNLOpen = table.Column<float>(type: "real", nullable: false),
+                    PNLClosed = table.Column<float>(type: "real", nullable: false),
+                    MaxProfitYetToGain = table.Column<float>(type: "real", nullable: false),
+                    Expry = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_SOrders", x => x.Id);
+                    table.PrimaryKey("PK_Strades", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -206,6 +202,60 @@ namespace Tradier.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "StradeFly",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false),
+                    Strike = table.Column<int>(type: "int", nullable: false),
+                    QtyContractsOpen = table.Column<int>(type: "int", nullable: false),
+                    QtyContractsClosed = table.Column<int>(type: "int", nullable: false),
+                    PNLOpen = table.Column<float>(type: "real", nullable: false),
+                    PNLClosed = table.Column<float>(type: "real", nullable: false),
+                    CallPut = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Expry = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_StradeFly", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_StradeFly_Strades_Id",
+                        column: x => x.Id,
+                        principalTable: "Strades",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "SOrders",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    brokerId = table.Column<int>(type: "int", nullable: false),
+                    StradeFlyId = table.Column<int>(type: "int", nullable: true),
+                    CreditDebit = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Symbol = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    CreateDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    ExpryDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    TransactionDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    NumLegs = table.Column<int>(type: "int", nullable: false),
+                    NumContracts = table.Column<int>(type: "int", nullable: false),
+                    Strategy = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    OpenClosed = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Price = table.Column<float>(type: "real", nullable: false),
+                    TOSString = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_SOrders", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_SOrders_StradeFly_StradeFlyId",
+                        column: x => x.StradeFlyId,
+                        principalTable: "StradeFly",
+                        principalColumn: "Id");
+                });
+
+            migrationBuilder.CreateTable(
                 name: "SLeg",
                 columns: table => new
                 {
@@ -275,6 +325,11 @@ namespace Tradier.Data.Migrations
                 name: "IX_SLeg_orderId",
                 table: "SLeg",
                 column: "orderId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_SOrders_StradeFlyId",
+                table: "SOrders",
+                column: "StradeFlyId");
         }
 
         /// <inheritdoc />
@@ -303,6 +358,12 @@ namespace Tradier.Data.Migrations
 
             migrationBuilder.DropTable(
                 name: "SOrders");
+
+            migrationBuilder.DropTable(
+                name: "StradeFly");
+
+            migrationBuilder.DropTable(
+                name: "Strades");
         }
     }
 }

@@ -13,8 +13,8 @@ namespace Tradier.Interfaces
         public DbSet<Balances> Balances { get; set; }
         public DbSet<Order> Orders { get; set; }
         public DbSet<SOrder> SOrders { get; set; }
-        //public DbSet<Strade> Strades { get; set; }
-        //public DbSet<StradeFly> StradeFly { get; set; }
+        public DbSet<Strade> Strades { get; set; }
+        public DbSet<StradeFly> StradeFly { get; set; }
 
         int SaveChanges();
 

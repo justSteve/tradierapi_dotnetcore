@@ -89,7 +89,7 @@ namespace Tradier.Client
             var rsp = JsonConvert.DeserializeObject<OrdersRootobject>(response).Orders;
 
 
-            string json = File.ReadAllText("C:\\Users\\steve\\OneDrive\\Code\\tradier-api\\orders.15_03.json");
+            string json = File.ReadAllText("C:\\Users\\steve\\OneDrive\\Code\\tradier-api\\orders.18_21.json");
             var ordersRoot = JsonConvert.DeserializeObject<OrdersRootobject>(json);
             var o = 0;
             var c = 0;
@@ -161,12 +161,12 @@ namespace Tradier.Client
                     }
                 }
 
-                //var thisStrade = LoadStrade(expry, centerStrike, sideType, makeSOrder);
+                var thisStrade = LoadStrade(expry, centerStrike, sideType, makeSOrder);
 
-                //var widthsFromCenter = legStrikes.Select(s => Math.Abs(s - strike)).Distinct().ToList();
-                //int width = widthsFromCenter.FirstOrDefault(w => w != 0);
+                var widthsFromCenter = legStrikes.Select(s => Math.Abs(s - strike)).Distinct().ToList();
+                int width = widthsFromCenter.FirstOrDefault(w => w != 0);
 
-                //bool foundExistingStrade = false;
+                bool foundExistingStrade = false;
                 //foreach (var strade in thisStrade)
                 //{
                 //    if (strike == strade.Strike)
@@ -243,7 +243,7 @@ namespace Tradier.Client
         {
 
             SOrder sorder = new SOrder();
-            
+
             var openClose = "open";
             var creditDebit = "debit";
             if (order.Legs.FirstOrDefault().Side.EndsWith("close"))
@@ -343,39 +343,39 @@ namespace Tradier.Client
 
         }
 
-        //private Strade LoadStrade(DateTime expry, int centerStrike, string sideType, SOrder order)
-        //{
+        private Strade LoadStrade(DateTime expry, int centerStrike, string sideType, SOrder order)
+        {
 
-        //    //try
-        //    //{
-        //    //    var strade = _dbContext.Strades
-        //    //        .Include(s => s.Flies)
-        //    //            .ThenInclude(f => f.SOrders) // If you also want to load the Orders
-        //    //        .Where(s => s.Expry == expry)
-        //    //        .Where(s => s.CallPut == sideType)
-        //    //        .Where(s => s.Strike == centerStrike)
-        //    //        //.AsSplitQuery()
-        //    //        .SingleOrDefault()
-        //    //        ;
-        //    //    _logger.Information($"LoadStrade: {strade}");
-        //    //    if (strade == null)
-        //    //    {
-        //    //        return CreateStrade(expry, centerStrike, sideType, order);
-        //    //    }
-        //    //    else
-        //    //    {
-        //    //        return strade;
-        //    //    }
-        //    //}
-        //    //catch (Exception e)
-        //    //{
-        //    //    _logger.Fatal($"LoadStrade: {e}");
+            try
+            {
+                var strade = _dbContext.Strades
+                    .Include(s => s.Flies)
+                        .ThenInclude(f => f.SOrders) // If you also want to load the Orders
+                    .Where(s => s.Expry == expry)
+                    .Where(s => s.CallPut == sideType)
+                    .Where(s => s.Strike == centerStrike)
+                    //.AsSplitQuery()
+                    .SingleOrDefault()
+                    ;
+                _logger.Information($"LoadStrade: {strade}");
+                if (strade == null)
+                {
+                    return CreateStrade(expry, centerStrike, sideType, order);
+                }
+                else
+                {
+                    return strade;
+                }
+            }
+            catch (Exception e)
+            {
+                _logger.Fatal($"LoadStrade: {e}");
 
-        //    //    return null;
-        //    //}
+                return null;
+            }
 
 
-        //}
+        }
         private Strade CreateStrade(DateTime expry, int centerStrike, string sideType, SOrder sOrder)
         {
 
@@ -393,12 +393,12 @@ namespace Tradier.Client
                         new StradeFly(centerStrike, sideType, expry, sOrder)
                     },
                     TOSNotation = notation,
-                    
+
                 };
                 _logger.Information($"{nameof(CreateStrade)}: {strade}");
 
-                //_dbContext.Strades.Add(strade);
-                //_dbContext.SaveChanges();
+                _dbContext.Strades.Add(strade);
+                _dbContext.SaveChanges();
 
                 return strade;
             }
@@ -412,18 +412,18 @@ namespace Tradier.Client
 
 
         // Load Strade objects from a JSON file into the global list
-        public static void LoadStrade()
-        {
-            if (File.Exists("C:\\Users\\steve\\Source\\Repos\\TradierClient2\\TradierClient2\\parseOrders\\GlobalStradesList.json"))
-            {
-                string json = File.ReadAllText("C:\\Users\\steve\\Source\\Repos\\TradierClient2\\TradierClient2\\parseOrders\\GlobalStradesList.json");
-                GlobalStradesList = JsonConvert.DeserializeObject<List<Strade>>(json);
-            }
-            else
-            {
-                GlobalStradesList = new List<Strade>();  // Initialize as an empty list if the file doesn't exist
-            }
-        }
+        //public static void LoadStrade()
+        //{
+        //    if (File.Exists("C:\\Users\\steve\\Source\\Repos\\TradierClient2\\TradierClient2\\parseOrders\\GlobalStradesList.json"))
+        //    {
+        //        string json = File.ReadAllText("C:\\Users\\steve\\Source\\Repos\\TradierClient2\\TradierClient2\\parseOrders\\GlobalStradesList.json");
+        //        GlobalStradesList = JsonConvert.DeserializeObject<List<Strade>>(json);
+        //    }
+        //    else
+        //    {
+        //        GlobalStradesList = new List<Strade>();  // Initialize as an empty list if the file doesn't exist
+        //    }
+        //}
 
         // Save the global list of Strade objects to a JSON file
         public static void SaveStradesToFile()
