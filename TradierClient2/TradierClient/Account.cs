@@ -9,9 +9,10 @@ using Tradier.Interfaces;
 using SharedHelpers2;
 using Serilog;
 using Microsoft.EntityFrameworkCore;
-using Azure;
+//using Azure;
 using Tradier.Client.Models.Trading;
 using Tradier.Entities.Models;
+using Tradier.Entities.DTOs;
 // ReSharper disable once CheckNamespace
 namespace Tradier.Client
 {
@@ -86,29 +87,95 @@ namespace Tradier.Client
 
             _logger.Information($"{nameof(GetStrades)}: {response}");
 
-            var rsp = JsonConvert.DeserializeObject<OrdersRootobject>(response).Orders;
+            //            var ordersRoot = JsonConvert.DeserializeObject<OrdersRootobject>(response).Orders;
 
 
-            string json = File.ReadAllText("C:\\Users\\steve\\OneDrive\\Code\\tradier-api\\orders.18_21.json");
-            var ordersRoot = JsonConvert.DeserializeObject<OrdersRootobject>(json);
+            //orders.15_15.json
+            //orders.14_40.json
+            //orders.13_42.json
+            //orders.12_59.json
+            //orders.13_12.json
+            //
+            //orders.12_13.json
+            //orders.12_23.json
+            //
+            // Get the current working directory
+            var json = "";
+            string currentDirectory = Directory.GetCurrentDirectory();
+
+            // Construct the full path to the file
+            string filePath = Path.Combine(currentDirectory, "orders.16_14.json");
+
+            try
+            {
+                // Read the contents of the file
+                 json = File.ReadAllText(filePath);
+
+                // Do something with the JSON data
+                Console.WriteLine(json);
+            }
+            catch (FileNotFoundException)
+            {
+                Console.WriteLine($"File not found: {filePath}");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"An error occurred: {ex.Message}");
+            }
+        
+        // Now 'json' contains the content of the file
+        //Console.WriteLine(json);
+
+            //string json = File.ReadAllText("orders.16_14.json");
+            var ordersRoot = JsonConvert.DeserializeObject<OrdersRootobject>(json).Orders;
             var o = 0;
             var c = 0;
 
-            int? maxId = _dbContext.Orders.Max(s => (int?)s.Id);
+            //DateTime maxId = _dbContext.Orders.Max(s => s.CreateDate);
 
 
-            // LINQ query to filter orders
-            var filteredOrders = ordersRoot.Orders.Order
-                    .Where(o => o.Status == "filled" && o.NumLegs == 3)
-                    //.Where(o => o.Id > maxId)
+            //// LINQ query to filter orders
+            //var allOrders = ordersRoot.Order
+            //        //.Where(o => o.Status != "filled")
+            //        //.Where(o => o.CreateDate > maxId)
+            //        .OrderBy(o => o.TransactionDate)
+            //        .ToList();
+
+
+
+            //foreach (var order in allOrders)
+            //{
+            //    var strike = 0;
+            //    var fillClass = order.Class = "option";
+            //    var fillOS = order.OptionSymbol = "wtf";
+            //    foreach (var leg1 in order.Legs)
+            //    {
+            //        var fillClassLeg = leg1.Class = "option";
+            //    }
+
+            //    //save to db
+            //    try
+            //    {
+
+            //        _dbContext.Orders.Add(order);
+            //        var saveChanges = _dbContext.SaveChanges();
+            //    }
+            //    catch (Exception e)
+            //    {
+            //        _logger.Fatal("Save Order " + order.Id + ": " + e.InnerException.ToString());
+            //        throw;
+            //    }
+
+            //}
+
+            var filteredOrders = ordersRoot.Order
+                    .Where(o => o.Status == "filled")
+                    //.Where(o => o.TransactionDate > maxId)
                     .OrderBy(o => o.TransactionDate)
                     .ToList();
-
-
-
             foreach (var order in filteredOrders)
             {
-                var strike = 0;
+                //var strike = 0;
                 var fillClass = order.Class = "option";
                 var fillOS = order.OptionSymbol = "wtf";
                 foreach (var leg1 in order.Legs)
@@ -119,12 +186,13 @@ namespace Tradier.Client
                 //save to db
                 try
                 {
+                    _logger.Information("FilteredOrders: " + JsonConvert.SerializeObject(order, Formatting.Indented));
                     _dbContext.Orders.Add(order);
                     var saveChanges = _dbContext.SaveChanges();
                 }
                 catch (Exception e)
                 {
-                    _logger.Fatal("Save Order" + e.InnerException.ToString());
+                    _logger.Fatal("Save Order " + order.Id + ": " + e.InnerException.ToString());
                     throw;
                 }
 
@@ -133,12 +201,13 @@ namespace Tradier.Client
 
                 try
                 {
+                    _logger.Information("SOrder: " + JsonConvert.SerializeObject(makeSOrder, Formatting.Indented));
                     _dbContext.SOrders.Add(makeSOrder);
                     var saveChanges = _dbContext.SaveChanges();
                 }
                 catch (Exception e)
                 {
-                    _logger.Fatal("Save SOrder" + e.InnerException.ToString());
+                    _logger.Fatal("Save SOrder " + makeSOrder.brokerId + ": " + e.InnerException.ToString());
                     throw;
                 }
 
@@ -148,6 +217,7 @@ namespace Tradier.Client
 
                 List<int> legStrikes = new List<int>();  // To store all strikes of the order
                 int centerStrike = 0;
+                var strike = 0;
                 foreach (var leg in order.Legs)
                 {
                     OptionSymbolHelper.ParseOCCSymbol(leg.OptionSymbol, out string _underlying, out DateTime _expiry, out string _side, out int _strike);
@@ -161,65 +231,69 @@ namespace Tradier.Client
                     }
                 }
 
-                var thisStrade = LoadStrade(expry, centerStrike, sideType, makeSOrder);
+                Strade thisStrade = LoadStrade(expry, centerStrike, sideType, makeSOrder);
+
+                //#The Strade is a containor of 0DTE Flys for a given day It is the endpoint
+                // for all CRUD ops on the capital 
+                // at risk by Strike/CallPut
+                // The contents of the thisStrade are a set of flys that all share the same 
+                // ShortCenter at open. The set consists flys where the wingWidth is 5W, 10W, 15W, 20W, 25W where each of those 
+                // wingWidths can have one or more instances/positions -- and each of those postitions can
+                // have multiple contracts.
+
+                // Based on the current SOrder instance We must discover the wingWidth (WW) in order
+                // to create a set of positions (flys) within. After discovery, do other flys already exist
+                // there? Else Add(thisFly). And so flys are stacked.
 
                 var widthsFromCenter = legStrikes.Select(s => Math.Abs(s - strike)).Distinct().ToList();
                 int width = widthsFromCenter.FirstOrDefault(w => w != 0);
+                bool foundExistingWingWidth = false;
+                bool foundExistingFly = false;
 
-                bool foundExistingStrade = false;
-                //foreach (var strade in thisStrade)
-                //{
-                //    if (strike == strade.Strike)
-                //    {
-                //        foundExistingStrade = true;
-                //        bool foundExistingFly = false;
 
-                //        //if (flyWidth == width)
-                //        //{
-                //        //    foundExistingFly = true;
-                //        //    fly.SOrders.Add(order);
-                //        //    break;
-                //        //}
-                //    }
+                foreach (var strade in thisStrade.Flies)
+                {
+                    if (strike == strade.Strike)
+                    {
+                        _logger.Information("FOUNDSTRIKEww: " + JsonConvert.SerializeObject(order, Formatting.Indented));
 
-                //    //if (!foundExistingFly)
-                //    //{
-                //    //    var newFly = new StradeFly(strike, sideType, expry, order);
-                //    //    strade.Flies.Add(newFly);
-                //    //}
+                        foundExistingWingWidth = true;
 
-                //    break;
-                //}
+                        //if (widthsFromCenter == width)
+                        //{
+                        //    foundExistingFly = true;
+                        //    fly.SOrders.Add(order);
+                        //    break;
+                        //}
+                    }
+
+                    if (!foundExistingFly)
+                    {
+                        _logger.Information("!foundExistingFly: " + JsonConvert.SerializeObject(order, Formatting.Indented));
+
+                        var newFly = new StradeFly(strike, sideType, expry, makeSOrder);
+                        thisStrade.Flies.Add(newFly);
+                    }
+
+                    break;
+                }
+
             }
 
-            //if (!foundExistingStrade)
-            //{
-            //    var newStrade = new Strade
-            //    {
-            //        Strike = strike,
-            //        CallPut = sideType,
-            //        Expry = expry,
-            //        Flies = new List<StradeFly>
-            //        {
-            //            new StradeFly(strike, sideType, expry, order)
-            //        }
-            //    };
-            //    GlobalStradesList.Add(newStrade);
-            //}
 
             return null;
         }
 
         private string TransformToTOS(SOrder sOrder)
         {
-            string TOSExpry = sOrder.ExpryDate.ToString("dd MMM yy").ToUpper();
+            string TOSExpry = sOrder.Expry.ToString("dd MMM yy").ToUpper();
             string TOSStrikes = BuildFlyStrikesForTOS(sOrder);
             string tosString = "";
 
             if (sOrder.Strategy.ToLower().Contains("fly"))
             {
                 tosString = "BUY +" + sOrder.NumContracts + " BUTTERFLY SPX 100 " + TOSExpry + " " + TOSStrikes
-                     + " " + sOrder.SLegs.First().PutCall //yeahyeah_hardcoding the fly
+                     + " " + sOrder.SLegs.First().CallPut //yeahyeah_hardcoding the fly
                      + " @" + sOrder.Price + " LMT";
             }
 
@@ -289,18 +363,18 @@ namespace Tradier.Client
                 sleg.OptionSymbol = leg.OptionSymbol;
 
                 OptionSymbolHelper.ParseOCCSymbol(leg.OptionSymbol, out string _underlying,
-                    out DateTime _expiry, out string _putCall, out int _strike);
+                    out DateTime _expiry, out string _CallPut, out int _strike);
 
-                if (_putCall == "P")
+                if (_CallPut == "P")
                 {
-                    _putCall = "PUT";
+                    _CallPut = "PUT";
                 }
                 else
                 {
-                    _putCall = "CALL";
+                    _CallPut = "CALL";
                 }
 
-                sleg.PutCall = _putCall;
+                sleg.CallPut = _CallPut;
                 sleg.Strike = _strike;
                 sleg.Underlying = _underlying;
                 sleg.Expry = _expiry;
@@ -310,7 +384,7 @@ namespace Tradier.Client
 
             sorder.Strategy = ParseForStrategy(sorder);
 
-            sorder.ExpryDate = sorder.SLegs.FirstOrDefault().Expry;
+            sorder.Expry = sorder.SLegs.FirstOrDefault().Expry;
 
             return sorder;
         }
@@ -345,12 +419,11 @@ namespace Tradier.Client
 
         private Strade LoadStrade(DateTime expry, int centerStrike, string sideType, SOrder order)
         {
-
             try
             {
                 var strade = _dbContext.Strades
                     .Include(s => s.Flies)
-                        .ThenInclude(f => f.SOrders) // If you also want to load the Orders
+                    //.ThenInclude(f => f.SOrders) // If you also want to load the Orders
                     .Where(s => s.Expry == expry)
                     .Where(s => s.CallPut == sideType)
                     .Where(s => s.Strike == centerStrike)
@@ -364,19 +437,51 @@ namespace Tradier.Client
                 }
                 else
                 {
-                    return strade;
+                    _logger.Information("UPDATE STRADE: " + JsonConvert.SerializeObject(order, Formatting.Indented));
+
+                    return UpdateStrade(strade, order);
                 }
             }
             catch (Exception e)
             {
-                _logger.Fatal($"LoadStrade: {e}");
+                _logger.Fatal($"LoadStrade " + order.Id + ": {e}");
 
                 return null;
             }
 
 
         }
-        private Strade CreateStrade(DateTime expry, int centerStrike, string sideType, SOrder sOrder)
+
+        private Strade UpdateStrade(Strade strade, SOrder sOrder)
+        {
+            try
+            {
+                string notation = TransformToTOS(sOrder);
+
+                _logger.Information($"UpdateStrade: {JsonConvert.SerializeObject(strade, Formatting.Indented)}");
+
+                foreach (var leg in sOrder.SLegs)
+                {
+                    StradeFly addSOrderLeg = new StradeFly(leg.Strike, leg.CallPut, leg.Expry, sOrder);
+                    strade.Flies.Add(addSOrderLeg);
+                }
+
+
+
+
+                _dbContext.Strades.Add(strade);
+                _dbContext.SaveChanges();
+                return strade;
+            }
+            catch (Exception e)
+            {
+                _logger.Fatal($"{nameof(CreateStrade)}: {e}");
+                throw;
+            }
+
+        }
+
+        private Strade CreateStrade(DateTime expry, int centerStrike, string CallPut, SOrder sOrder)
         {
 
             try
@@ -386,16 +491,16 @@ namespace Tradier.Client
                 var strade = new Strade
                 {
                     Strike = centerStrike,
-                    CallPut = sideType,
+                    CallPut = CallPut,
                     Expry = expry,
                     Flies = new List<StradeFly>
                     {
-                        new StradeFly(centerStrike, sideType, expry, sOrder)
+                        new StradeFly(centerStrike, CallPut, expry, sOrder)
                     },
                     TOSNotation = notation,
 
                 };
-                _logger.Information($"{nameof(CreateStrade)}: {strade}");
+                _logger.Information("CREATESTRADE: " + JsonConvert.SerializeObject(sOrder, Formatting.Indented));
 
                 _dbContext.Strades.Add(strade);
                 _dbContext.SaveChanges();

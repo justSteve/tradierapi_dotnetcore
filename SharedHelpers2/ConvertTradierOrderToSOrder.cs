@@ -19,7 +19,7 @@ namespace SharedHelpers2
         //        underlying = matches[0].Value;  // The first match is the underlying asset
         //        bool isValidDate = DateTime.TryParseExact(matches[1].Value, format, null, System.Globalization.DateTimeStyles.None, out expiryDate);
 
-        //        putCall = matches[2].Value;    // The third match is the option type ('P' or 'C')
+        //        CallPut = matches[2].Value;    // The third match is the option type ('P' or 'C')
 
         //        string rawStrike = "NotSPX";
 
@@ -36,7 +36,7 @@ namespace SharedHelpers2
         //    {
         //        underlying = "error";
         //        expiryDate = DateTime.UtcNow;  // The second match is the expiration date
-        //        putCall = e.Message;    // The third match is the option type ('P' or 'C')
+        //        CallPut = e.Message;    // The third match is the option type ('P' or 'C')
 
         //        strike = 0;
         //    }

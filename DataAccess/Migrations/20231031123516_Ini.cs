@@ -209,10 +209,11 @@ namespace Tradier.Data.Migrations
                     Strike = table.Column<int>(type: "int", nullable: false),
                     QtyContractsOpen = table.Column<int>(type: "int", nullable: false),
                     QtyContractsClosed = table.Column<int>(type: "int", nullable: false),
+                    CostBasis = table.Column<float>(type: "real", nullable: false),
                     PNLOpen = table.Column<float>(type: "real", nullable: false),
                     PNLClosed = table.Column<float>(type: "real", nullable: false),
                     CallPut = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Expry = table.Column<DateTime>(type: "datetime2", nullable: false)
+                    Expry = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -236,7 +237,7 @@ namespace Tradier.Data.Migrations
                     CreditDebit = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Symbol = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     CreateDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    ExpryDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    Expry = table.Column<DateTime>(type: "datetime2", nullable: false),
                     TransactionDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     NumLegs = table.Column<int>(type: "int", nullable: false),
                     NumContracts = table.Column<int>(type: "int", nullable: false),
@@ -277,7 +278,7 @@ namespace Tradier.Data.Migrations
                     OptionSymbol = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Underlying = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Strike = table.Column<int>(type: "int", nullable: false),
-                    PutCall = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    CallPut = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Expry = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
                 constraints: table =>

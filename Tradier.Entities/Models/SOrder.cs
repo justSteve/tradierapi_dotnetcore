@@ -27,7 +27,7 @@ namespace Tradier.Entities.Models
         public string CreditDebit { get; set; } // Credit|Debit Parse this from the 
         public string Symbol { get; set; }
         public DateTime CreateDate { get; set; }
-        public DateTime ExpryDate { get; set; }
+        public DateTime Expry { get; set; }
         public DateTime TransactionDate { get; set; }
         public int NumLegs { get; set; }
         public int NumContracts { get; set; }
@@ -117,9 +117,8 @@ namespace Tradier.Entities.Models
         public string OptionSymbol { get; set; }
 
         public string Underlying { get; set; }
-        //public DateTime ExpryDate { get; set; }
         public int Strike { get; set; }
-        public string PutCall { get; set; }
+        public string CallPut { get; set; }
         public DateTime Expry { get; set; }
     }
 

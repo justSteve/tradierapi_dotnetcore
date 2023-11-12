@@ -5,7 +5,7 @@ namespace SharedHelpers2
 {
     public static class OptionSymbolHelper
     {
-        public static void ParseOCCSymbol(string optionSymbol, out string underlying, out DateTime expryDate, out string putCall, out int strike)
+        public static void ParseOCCSymbol(string optionSymbol, out string underlying, out DateTime expryDate, out string CallPut, out int strike)
         {
             ;
             string format = "yyMMdd";  // Adjust the format as needed
@@ -19,7 +19,7 @@ namespace SharedHelpers2
                 underlying = matches[0].Value;  // The first match is the underlying asset
                 bool isValidDate = DateTime.TryParseExact(matches[1].Value, format, null, System.Globalization.DateTimeStyles.None, out expryDate);
 
-                putCall = matches[2].Value;    // The third match is the option type ('P' or 'C')
+                CallPut = matches[2].Value;    // The third match is the option type ('P' or 'C')
 
                 string rawStrike = "NotSPX";
 
@@ -36,7 +36,7 @@ namespace SharedHelpers2
             {
                 underlying = "error";
                 expryDate = DateTime.UtcNow;  // The second match is the expiration date
-                putCall = e.Message;    // The third match is the option type ('P' or 'C')
+                CallPut = e.Message;    // The third match is the option type ('P' or 'C')
 
                 strike = 0;
             }

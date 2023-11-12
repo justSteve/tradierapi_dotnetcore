@@ -27,7 +27,8 @@ namespace Tradier.Client
         /// <summary>
         /// The TradierClient constructor (with an existing HttpClient)
         /// </summary>
-        public TradierClient(HttpClient httpClient, string apiToken, string defaultAccountNumber, ITradierDbContext dbContext, Serilog.ILogger logger = null, bool useProduction = false)
+        public TradierClient(HttpClient httpClient, string apiToken, string defaultAccountNumber
+            , ITradierDbContext dbContext, Serilog.ILogger logger = null, bool useProduction = false)
         {
             _logger = logger ?? Log.Logger;  // Use provided logger or fallback to static logger
             _logger.Information("Initializing TradierClient...");

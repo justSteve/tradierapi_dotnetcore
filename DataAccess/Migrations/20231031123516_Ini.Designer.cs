@@ -12,7 +12,7 @@ using Tradier.Data;
 namespace Tradier.Data.Migrations
 {
     [DbContext(typeof(TradierDbContext))]
-    [Migration("20231030132354_Ini")]
+    [Migration("20231031123516_Ini")]
     partial class Ini
     {
         /// <inheritdoc />
@@ -364,6 +364,10 @@ namespace Tradier.Data.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("CallPut")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<float>("CostBasis")
                         .HasColumnType("real");
 
@@ -375,10 +379,6 @@ namespace Tradier.Data.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("OptionSymbol")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("PutCall")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
@@ -441,7 +441,7 @@ namespace Tradier.Data.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTime>("ExpryDate")
+                    b.Property<DateTime>("Expry")
                         .HasColumnType("datetime2");
 
                     b.Property<int>("NumContracts")
@@ -536,8 +536,12 @@ namespace Tradier.Data.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTime>("Expry")
-                        .HasColumnType("datetime2");
+                    b.Property<float>("CostBasis")
+                        .HasColumnType("real");
+
+                    b.Property<string>("Expry")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<float>("PNLClosed")
                         .HasColumnType("real");

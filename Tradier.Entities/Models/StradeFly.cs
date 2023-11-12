@@ -10,17 +10,16 @@ namespace Tradier.Entities.Models
         public StradeFly()
         {
             SOrders = new List<SOrder>();  // Initialize the Orders list
-
         }
 
         // Your existing constructor
-        public StradeFly(int strike, string sideType, DateTime expry, SOrder order)
+        public StradeFly(int strike, string callPut, DateTime expry, SOrder sOrder)
         {
             Strike = strike;
-            CallPut = sideType;
-            Expry = expry;
-            SOrders = new List<SOrder>();  // Initialize the Orders list
-            SOrders.Add(order);
+            CallPut = callPut;
+            Expry = expry.ToString("dd MMM yy").ToUpper();
+            SOrders = new List<SOrder>();  // Initialize the Orders list  // Initialize the Orders list
+            SOrders.Add(sOrder);
         }
 
         [Key]
@@ -29,10 +28,11 @@ namespace Tradier.Entities.Models
         public int Strike { get; set; }  // of the underlying
         public int QtyContractsOpen { get; set; }
         public int QtyContractsClosed { get; set; }
+        public float CostBasis { get; set; }
         public float PNLOpen { get; set; }
         public float PNLClosed { get; set; }
         public string CallPut { get; set; } // 'call' or 'put'
-        public DateTime Expry { get; set; } // Expiry date
+        public string Expry { get; set; } // Expiry date
         public List<SOrder> SOrders { get; set; } // List of TradierOrder instances
     }
 }
