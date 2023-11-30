@@ -46,7 +46,8 @@ Log.Logger = new LoggerConfiguration()
         connectionString: connectionString,
         sinkOptions: sinkOpts,
         restrictedToMinimumLevel: LogEventLevel.Information
-    )
+        )
+    .WriteTo.File("log.txt", buffered: false)
     .CreateLogger();
 
 builder.Host.UseSerilog();

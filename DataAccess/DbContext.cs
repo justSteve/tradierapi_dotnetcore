@@ -20,10 +20,20 @@ namespace Tradier.Data
 
 
         public DbSet<Balances> Balances { get; set; }
+        //returned by Tradier's API
+
         public DbSet<Order> Orders { get; set; }
+        //returned by Tradier's API
+
         public DbSet<SOrder> SOrders { get; set; }
+        // my version of what fields an order needs
+        
         public DbSet<Strade> Strades { get; set; }
+        //  StrikeTrade (or SteveTrade if you prefer)
+
         public DbSet<StradeFly> StradeFly { get; set; }
+        // my version of a butterfly
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<Order>()
@@ -46,7 +56,7 @@ namespace Tradier.Data
             modelBuilder.Entity<StradeFly>()
                 .HasMany(s => s.SOrders)
                 .WithOne()
-                .HasForeignKey(o => o.StradeFlyId)
+                .HasForeignKey(o => o.StradeId)
                 .IsRequired(false);  // Indicate that the foreign key is optional
 
 
@@ -83,16 +93,5 @@ namespace Tradier.Data
                 .HasKey(b => b.sId);  // Explicitly set the primary key
 
         }
-
-        //protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        //{
-        //    base.OnConfiguring(optionsBuilder);
-        //    SetupWarnings(optionsBuilder);
-        //}
-
-        //public void SetupWarnings(DbContextOptionsBuilder optionsBuilder = null)
-        //{
-        //    optionsBuilder?.ConfigureWarnings(w => w.Throw(RelationalEventId.MultipleCollectionIncludeWarning));
-        //}
     }
 }

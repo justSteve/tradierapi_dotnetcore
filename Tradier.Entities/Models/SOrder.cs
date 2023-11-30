@@ -21,8 +21,7 @@ namespace Tradier.Entities.Models
         public int Id { get; set; }
         public int brokerId { get; set; }
 
-        public int? StradeFlyId { get; set; } // Nullable foreign key to StradeFly
-        //public int? StradeId { get; set; } // Nullable foreign key to StradeFly
+        public int? StradeId { get; set; } // Nullable foreign key to StradeFly
 
         public string CreditDebit { get; set; } // Credit|Debit Parse this from the 
         public string Symbol { get; set; }

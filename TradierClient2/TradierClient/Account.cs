@@ -85,7 +85,7 @@ namespace Tradier.Client
 
             var response = await _requests.GetRequest($"accounts/{accountNumber}/orders");
 
-            _logger.Information($"{nameof(GetStrades)}: {response}");
+            //_logger.Information($"{nameof(GetStrades)}: {response}");
 
             //            var ordersRoot = JsonConvert.DeserializeObject<OrdersRootobject>(response).Orders;
 
@@ -99,34 +99,12 @@ namespace Tradier.Client
             //orders.12_13.json
             //orders.12_23.json
             //
-            // Get the current working directory
-            var json = "";
-            string currentDirectory = Directory.GetCurrentDirectory();
+            // the following file is stored at the root of this project
+            // gpt is not up to the task of informing me how to code that location instead
+            // of the complier's output dir down in: C:\Users\foo\cli\bin\Debug\net7.0\orders.16_14.json
+            string json = File.ReadAllText("C:\\Users\\steve\\OneDrive\\Code\\tradier-api\\orders.17_31.json");
 
-            // Construct the full path to the file
-            string filePath = Path.Combine(currentDirectory, "orders.16_14.json");
 
-            try
-            {
-                // Read the contents of the file
-                 json = File.ReadAllText(filePath);
-
-                // Do something with the JSON data
-                Console.WriteLine(json);
-            }
-            catch (FileNotFoundException)
-            {
-                Console.WriteLine($"File not found: {filePath}");
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"An error occurred: {ex.Message}");
-            }
-        
-        // Now 'json' contains the content of the file
-        //Console.WriteLine(json);
-
-            //string json = File.ReadAllText("orders.16_14.json");
             var ordersRoot = JsonConvert.DeserializeObject<OrdersRootobject>(json).Orders;
             var o = 0;
             var c = 0;
@@ -187,8 +165,10 @@ namespace Tradier.Client
                 try
                 {
                     _logger.Information("FilteredOrders: " + JsonConvert.SerializeObject(order, Formatting.Indented));
+                    
                     _dbContext.Orders.Add(order);
                     var saveChanges = _dbContext.SaveChanges();
+                    
                 }
                 catch (Exception e)
                 {
@@ -255,7 +235,7 @@ namespace Tradier.Client
                 {
                     if (strike == strade.Strike)
                     {
-                        _logger.Information("FOUNDSTRIKEww: " + JsonConvert.SerializeObject(order, Formatting.Indented));
+                        _logger.Information("FOUNDSTRIKE: " + JsonConvert.SerializeObject(order, Formatting.Indented));
 
                         foundExistingWingWidth = true;
 
@@ -271,7 +251,7 @@ namespace Tradier.Client
                     {
                         _logger.Information("!foundExistingFly: " + JsonConvert.SerializeObject(order, Formatting.Indented));
 
-                        var newFly = new StradeFly(strike, sideType, expry, makeSOrder);
+                        var newFly = new StradeFly(strike, sideType, expry, makeSOrder, strade.Id);
                         thisStrade.Flies.Add(newFly);
                     }
 
@@ -462,7 +442,7 @@ namespace Tradier.Client
 
                 foreach (var leg in sOrder.SLegs)
                 {
-                    StradeFly addSOrderLeg = new StradeFly(leg.Strike, leg.CallPut, leg.Expry, sOrder);
+                    StradeFly addSOrderLeg = new StradeFly(leg.Strike, leg.CallPut, leg.Expry, sOrder, strade.Id);
                     strade.Flies.Add(addSOrderLeg);
                 }
 
@@ -493,16 +473,19 @@ namespace Tradier.Client
                     Strike = centerStrike,
                     CallPut = CallPut,
                     Expry = expry,
-                    Flies = new List<StradeFly>
-                    {
-                        new StradeFly(centerStrike, CallPut, expry, sOrder)
-                    },
                     TOSNotation = notation,
 
                 };
                 _logger.Information("CREATESTRADE: " + JsonConvert.SerializeObject(sOrder, Formatting.Indented));
 
                 _dbContext.Strades.Add(strade);
+                _dbContext.SaveChanges();
+
+                strade.Flies = new List<StradeFly>
+                    {
+                        new StradeFly(centerStrike, CallPut, expry, sOrder, strade.Id)
+                    };
+
                 _dbContext.SaveChanges();
 
                 return strade;

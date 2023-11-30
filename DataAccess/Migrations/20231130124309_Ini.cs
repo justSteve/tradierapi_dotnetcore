@@ -206,6 +206,7 @@ namespace Tradier.Data.Migrations
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false),
+                    StradeId = table.Column<int>(type: "int", nullable: false),
                     Strike = table.Column<int>(type: "int", nullable: false),
                     QtyContractsOpen = table.Column<int>(type: "int", nullable: false),
                     QtyContractsClosed = table.Column<int>(type: "int", nullable: false),
@@ -233,7 +234,7 @@ namespace Tradier.Data.Migrations
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     brokerId = table.Column<int>(type: "int", nullable: false),
-                    StradeFlyId = table.Column<int>(type: "int", nullable: true),
+                    StradeId = table.Column<int>(type: "int", nullable: true),
                     CreditDebit = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Symbol = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     CreateDate = table.Column<DateTime>(type: "datetime2", nullable: false),
@@ -250,8 +251,8 @@ namespace Tradier.Data.Migrations
                 {
                     table.PrimaryKey("PK_SOrders", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_SOrders_StradeFly_StradeFlyId",
-                        column: x => x.StradeFlyId,
+                        name: "FK_SOrders_StradeFly_StradeId",
+                        column: x => x.StradeId,
                         principalTable: "StradeFly",
                         principalColumn: "Id");
                 });
@@ -328,9 +329,9 @@ namespace Tradier.Data.Migrations
                 column: "orderId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_SOrders_StradeFlyId",
+                name: "IX_SOrders_StradeId",
                 table: "SOrders",
-                column: "StradeFlyId");
+                column: "StradeId");
         }
 
         /// <inheritdoc />

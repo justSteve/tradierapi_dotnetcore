@@ -454,7 +454,7 @@ namespace Tradier.Data.Migrations
                     b.Property<float>("Price")
                         .HasColumnType("real");
 
-                    b.Property<int?>("StradeFlyId")
+                    b.Property<int?>("StradeId")
                         .HasColumnType("int");
 
                     b.Property<string>("Strategy")
@@ -477,7 +477,7 @@ namespace Tradier.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("StradeFlyId");
+                    b.HasIndex("StradeId");
 
                     b.ToTable("SOrders");
                 });
@@ -552,6 +552,9 @@ namespace Tradier.Data.Migrations
                     b.Property<int>("QtyContractsOpen")
                         .HasColumnType("int");
 
+                    b.Property<int>("StradeId")
+                        .HasColumnType("int");
+
                     b.Property<int>("Strike")
                         .HasColumnType("int");
 
@@ -609,7 +612,7 @@ namespace Tradier.Data.Migrations
                 {
                     b.HasOne("Tradier.Entities.Models.StradeFly", null)
                         .WithMany("SOrders")
-                        .HasForeignKey("StradeFlyId");
+                        .HasForeignKey("StradeId");
                 });
 
             modelBuilder.Entity("Tradier.Entities.Models.StradeFly", b =>
